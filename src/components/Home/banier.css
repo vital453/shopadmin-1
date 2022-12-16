@@ -1,0 +1,520 @@
+:root {
+    /* gradient color   */
+    --sky: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+
+    /*      theme font-family   */
+    --Abel   : 'Abel', cursive;
+    --Anton  : 'Anton', cursive;
+    --Josefin: 'Josefin', cursive;
+    --Lexend : 'Lexend', cursive;
+    --Livvic : 'Livvic', cursive;
+    --Roboto : 'Roboto', cursive;
+}
+
+.imp13 {
+    width: 100%;
+}
+.imp13a {
+    width: 100%;
+    height: 640px;
+    object-fit: cover;
+}
+.imp13b {
+    width: 100%;
+    height: 440px;
+    object-fit: cover;
+}
+
+.navihome {
+   height:100vh;
+   position: relative;
+}
+.nav12ab {
+   position: absolute;
+   top: 0;
+   left: 0;
+   opacity: 0;
+   transition: opacity .5s;
+ }
+ .active {
+    opacity: 1;
+  }
+.navi1 {
+    justify-content: center;
+    align-items    : center;
+    text-align     : center;
+    font-family    : var(--Roboto);
+    position       : relative;
+    top            : -350px;
+}
+.navi1b {
+    justify-content: center;
+    align-items    : center;
+    text-align     : center;
+    font-family    : var(--Roboto);
+    position       : relative;
+    top            : -500px;
+}
+.navi1b1 {
+    justify-content: center;
+    align-items    : center;
+    text-align     : center;
+    font-family    : var(--Roboto);
+    position       : relative;
+    top            : -350px;
+}
+.navi1b2 {
+    justify-content: center;
+    align-items    : center;
+    text-align     : center;
+    font-family    : var(--Roboto);
+    position       : relative;
+    top            : -150px;
+}
+
+.navi1a {
+    justify-content: center;
+    align-items    : center;
+    text-align     : center;
+    font-family    : var(--Roboto);
+    position       : relative;
+    top            : -350px;
+}
+
+.navi1x {
+    justify-content: center;
+    align-items    : center;
+    text-align     : center;
+    font-family    : var(--Roboto);
+    position       : relative;
+    top            : -280px;
+}
+
+.navi11 {
+    margin-bottom: 0px;
+    margin-left: 20px;
+    text-align: left;
+}
+.navi11a {
+    margin-bottom: 0px;
+    text-align: center;
+}
+.babaki {
+    margin-bottom: 0px;
+    text-align: center;
+}
+.nanaki {
+   visibility: hidden;
+}
+.navi11b {
+    margin-bottom: 0px;
+    text-align: right;
+}
+
+.navi12 {
+    justify-content: center;
+    align-items    : center;
+    text-align     : center;
+    font-family    : var(--Roboto);
+    margin-left    : 0px;
+    margin-bottom  : 20px;
+}
+.navi12b {
+    justify-content: left;
+    align-items    : left;
+    text-align     : left;
+    font-family    : var(--Roboto);
+    margin-left    : 10px;
+    margin-bottom  : 20px;
+}
+.navipp2 {
+    font-size : 15px;
+    text-align: justify;
+    color     : rgb(255, 255, 255);
+    width     : 90%;
+}
+.navi12ba {
+    justify-content: center;
+    align-items    : center;
+    text-align     : center;
+    font-family    : var(--Roboto);
+    margin-left    : 80px;
+    margin-bottom  : 20px;
+}
+.navipp2a {
+    font-size : 15px;
+    text-align: center;
+    color     : rgb(255, 255, 255);
+    width     : 90%;
+}
+
+.npx {
+    justify-content: center;
+    align-items    : center;
+    text-align     : center;
+    font-family    : var(--Roboto);
+    margin-left    : 0px;
+    margin-bottom  : 20px;
+}
+
+.npl {
+    justify-content: center;
+    align-items    : center;
+    text-align     : center;
+    font-family    : var(--Roboto);
+    margin-left    : 0px;
+    margin-bottom  : 20px;
+}
+
+.navih {
+    font-size: 30px;
+    color    : rgb(255, 255, 255);
+}
+.navihv {
+    font-size: 30px;
+    color    : rgb(255, 255, 255);
+}
+.navih47 {
+    font-size: 50px;
+    color    : rgb(255, 255, 255);
+}
+.navihh {
+    font-size: 30px;
+    color    :rgba(14, 113, 184, 1);
+    font-weight: 600;
+    margin-bottom: 30px;
+
+}
+
+.navip {
+    font-size : 15px;
+    text-align: justify;
+    color     : rgb(255, 255, 255);
+    width     : 100%;
+    visibility: hidden;
+}
+
+.navip22 {
+    font-size : 15px;
+    text-align: justify;
+    color     : rgb(17, 17, 17);
+    width     : 100%;
+}
+
+.navipp {
+    font-size : 15px;
+    text-align: center;
+    color     : rgb(255, 255, 255);
+    width     : 100%;
+}
+
+
+.navi2 {
+    justify-content: center;
+    align-items    : center;
+    text-align     : center;
+    position       : relative;
+    top            : -310px;
+}
+
+.suivant, .precedent{
+    color: #ffffff;
+    font-size: 3rem;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%);
+    cursor: pointer;
+
+}
+.suivant{
+    right: 1rem;
+}
+.precedent{
+    left: 1rem;
+}
+.jjh{
+    color: #ffffff;
+}
+@media (min-width: 601px)and (max-width: 1200px){
+    .imp13 {
+        width: 100%;
+    }
+    .imp13a {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .navihome {
+       height:100vh;
+       position: relative;
+    }
+    .nav12ab {
+       position: absolute;
+       top: 0;
+       left: 0;
+       opacity: 0;
+       transition: opacity .5s;
+     }
+     .active {
+        opacity: 1;
+      }
+    .navi1 {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        font-family    : var(--Roboto);
+        position       : relative;
+        top            : -350px;
+    }
+    .navi1b {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        font-family    : var(--Roboto);
+        position       : relative;
+        top            : -350px;
+    }
+    
+    .navi1a {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        font-family    : var(--Roboto);
+        position       : relative;
+        top            : -350px;
+    }
+    
+    .navi1x {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        font-family    : var(--Roboto);
+        position       : relative;
+        top            : -280px;
+    }
+    
+    .navi11 {
+        margin-bottom: 0px;
+        text-align: center;
+    }
+    
+    .navi12 {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        font-family    : var(--Roboto);
+        margin-left    : 0px;
+        margin-bottom  : 20px;
+    }
+    .navi12b {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        font-family    : var(--Roboto);
+        margin-left    : 80px;
+        margin-bottom  : 20px;
+    }
+    .navipp2 {
+        font-size : 15px;
+        text-align: center;
+        color     : rgb(255, 255, 255);
+        width     : 90%;
+    }
+    
+    .npx {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        font-family    : var(--Roboto);
+        margin-left    : 0px;
+        margin-bottom  : 20px;
+    }
+    
+    .npl {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        font-family    : var(--Roboto);
+        margin-left    : 0px;
+        margin-bottom  : 20px;
+    }
+    
+    .navih {
+        font-size: 30px;
+        color    : rgb(255, 255, 255);
+    }
+    .navihv {
+        font-size: 30px;
+        color    : rgb(255, 255, 255);
+    }
+    .navih47 {
+        font-size: 50px;
+        color    : rgb(255, 255, 255);
+    }
+    .navihh {
+        font-size: 30px;
+        color    :rgba(14, 113, 184, 1);
+        font-weight: 600;
+        margin-bottom: 30px;
+    
+    }
+    
+    .navip {
+        font-size : 15px;
+        text-align: justify;
+        color     : rgb(255, 255, 255);
+        width     : 100%;
+        visibility: visible;
+    }
+    
+    .navip22 {
+        font-size : 15px;
+        text-align: justify;
+        color     : rgb(17, 17, 17);
+        width     : 100%;
+    }
+    
+    .navipp {
+        font-size : 15px;
+        text-align: center;
+        color     : rgb(255, 255, 255);
+        width     : 100%;
+    }
+    
+    
+    .navi2 {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        position       : relative;
+        top            : -310px;
+    }
+    
+    .suivant, .precedent{
+        color: #ffffff;
+        font-size: 3rem;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%);
+        cursor: pointer;
+    
+    }
+    .suivant{
+        right: 1rem;
+    }
+    .precedent{
+        left: 1rem;
+    }
+}
+@media (min-width: 320px) and (max-width: 600px) {
+    .navihome{
+        margin-top: 0px;
+    }
+    .imp13a {
+        width: 100%;
+        height: 280px;
+        object-fit: cover;
+    }
+    .navi1b {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        font-family    : var(--Roboto);
+        position       : relative;
+        top            : 20px;
+        bottom: 0px;
+    }
+    .navi12b {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        font-family    : var(--Roboto);
+        margin-left    : 0px;
+        margin-bottom  : 20px;
+    }
+    .navipp2 {
+        font-size : 15px;
+        text-align: justify;
+        color     : rgb(31, 31, 31);
+        width     : 100%;
+    }
+    .navihv {
+        font-size: 30px;
+        color    : rgb(8, 8, 8);
+    }
+  
+    .lei {
+        color: #ffffff;
+    }
+
+    .imp13 {
+        width: 100%;
+
+    }
+
+    .navi1 {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        font-family    : var(--Roboto);
+        position       : relative;
+        top            : -100px;
+    }
+
+    .navi1x {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        font-family    : var(--Roboto);
+        position       : relative;
+        top            : -175px;
+    }
+
+    .navi11 {
+        margin-bottom: 20px;
+    }
+
+    .navi12 {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        font-family    : var(--Roboto);
+        margin-left    : 0px;
+        margin-bottom  : 0px;
+        margin-top     : 80px;
+    }
+
+    .navipp {
+        font-size : 12px;
+        text-align: center;
+        color     : rgb(255, 255, 255);
+        width     : 100%;
+    }
+
+    .navih {
+        font-size: 25px;
+        color    : rgb(255, 255, 255);
+    }
+
+    .navip {
+        font-size : 15px;
+        text-align: justify;
+        color     : rgb(0, 0, 0);
+        width     : 100%;
+        visibility: visible;
+    }
+ 
+    .navi2 {
+        justify-content: center;
+        align-items    : center;
+        text-align     : center;
+        position       : relative;
+        top            : -180px;
+    }
+
+    .sert {
+        margin-bottom: -150px;
+    }
+
+}

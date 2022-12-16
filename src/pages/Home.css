@@ -1,0 +1,40 @@
+.fab1{
+    
+    left: 70%;
+    top: 75%;
+    z-index: 2;
+}
+.fab5{   
+    left: 50%;
+    top: 65%;
+    z-index: 2;
+}
+.refresh{
+    background-color: aliceblue;
+    height: 1px;
+}
+.He{
+    font-family: Cool jazz;
+}
+.modal1{
+    top: 55%;
+    --backdrop-opacity: 0;
+}
+.iconmod{
+    margin-right: 23px;
+}
+.danaria{
+    height: 50px;
+}
+
+.textn1{
+    font-family: Cool jazz;
+    color: #ff4d4d;
+}
+.textn2{
+    font-family: Cool jazz;
+    
+}
+.scroll1{
+    max-height: 3px;
+}

@@ -1,0 +1,11 @@
+@font-face {   
+    font-family: 'Smooch';    //This is what we are going to call
+    src: url('../data/Smooch-Regular.ttf');
+}
+@font-face {   
+    font-family: 'Cool jazz';    //This is what we are going to call
+    src: url('../data/Cooljazz.ttf');
+}
+.tet{
+    font-family: Cool jazz ;
+}

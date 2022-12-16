@@ -1,0 +1,44 @@
+.inscripmed{
+    height: 60px;
+}
+.shad{
+    margin: 20px;
+}
+.bobo{
+    color: red;
+}
+.shad{
+    display: flex;
+    flex-direction: column;
+}
+.shad1{
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: left;
+}
+.shad1h{
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: left;
+    margin-left: 10px;
+}
+.shadh1h{
+    color: rgb(95, 94, 94);
+    font-size: 16px;
+}
+.de{
+    margin-top: 20px;
+}
+.mad1{
+  width: 100%;
+  margin-top: 30px;
+}
+.mad2{
+    margin-bottom: 30px;
+}
+.mad3{
+    font-size: 16px;
+    font-weight: 600;
+}

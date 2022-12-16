@@ -1,0 +1,82 @@
+.cartCheckout {
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    align-content: center;
+    margin: 1rem;
+}
+
+.cartFooter {
+
+    border-top: 2px solid rgb(200, 200, 200);
+    background-color: white;
+    height: 70px;
+}
+
+.cartCheckout ion-card-subtitle {
+
+    font-size: 1.3rem;
+    
+}
+
+.cartItem ion-avatar {
+
+    height: 4rem;
+    width: 4rem;
+
+   
+}
+.labpr{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: Cool jazz;
+}
+
+.cartSlider:not(:nth-child(1)) {
+
+    border-top: 2px solid rgb(236, 236, 236);
+}
+.edit{
+    margin-top: 5px;
+    
+    border-start-start-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    font-family: Cool jazz;
+    color: deepskyblue;
+    /* padding-left: 3px; */
+}
+.divedit{
+    
+    width: 80%;
+    text-align: center;
+}
+
+.cartActions {
+
+    /* display: flex;
+    flex-direction: column; */
+    display: flex;
+    justify-content: space-between;
+}
+.edition1{
+    width: 50%;
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+}
+.trash1{
+    margin-top: 9px;
+}
+.newcol{
+    padding-left: 40px;
+    padding-top: 7px;
+}
+.valid{
+    margin-bottom: 3px;
+    padding-left: 15px;
+}

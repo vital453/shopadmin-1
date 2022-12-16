@@ -1,0 +1,6 @@
+{
+	"appId": "com.shop.admin",
+	"appName": "ShopAdmin",
+	"webDir": "build",
+	"bundledWebRuntime": false
+}

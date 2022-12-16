@@ -1,0 +1,265 @@
+
+.hom{
+    background-color: aliceblue;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+
+
+.card{
+    font-family: Cool jazz;
+    width: 90%;
+    box-shadow: 1px 3px 2px black ;
+    height: 200px;
+    position: relative;
+    margin: auto;
+    max-width: 140px;
+    
+}
+.cardcontent{
+    text-align: center;
+    width: 100%;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    height: 65px;  
+    font-family: Cool jazz;
+}
+
+
+/* .imga {
+    height: 120px;
+    max-height: 120px;
+    border-radius: 5px;
+    border-bottom: 1px solid #0a0909;
+
+} */
+
+.imga {
+    height: 120px;
+    max-height: 120px;
+    border-radius: 5px;
+    border-bottom: 1px solid #0a0909;
+    object-fit: cover;
+    width: 100%;  /* A enlever au besoin */
+
+}
+
+
+
+
+.r1{
+    font-family: Cool jazz;
+    height: 20px;
+    width: 100%;
+    flex-direction: column;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.r2{
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 3px;
+}
+.r3{
+    width: 100%;
+}
+.c1{
+    width: 50%;
+    text-align: left;
+    margin-top: 4px;
+    padding-left: 0;
+    padding-right: 0;
+}
+.c2{
+    margin-bottom: 7px;
+    padding-left: 0;
+    padding-right: 0;
+}
+.note1{
+    font-family: Cool jazz;
+    font-size: x-small;
+    width: 50%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    
+}
+.ico1{
+    margin-right: 2px;
+    margin-bottom: 2px;
+}
+
+.ico2{
+    margin-left: 2px;
+    margin-bottom: 2px;
+}
+.badg{
+    font-size: smaller;
+    
+}
+.nom{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.notifbadge{
+    height: 20px;
+    width: 20px;
+    position: absolute;
+    left: 65%;
+    top: 5%;
+    z-index: 2;
+    
+}
+/* .addn{
+    width: 100%;
+} */
+.prog{
+    margin-top: 10px;
+}
+.comb{
+    width: 80px;
+    height: 20px;
+    font-size: x-small; 
+    margin-top: 10px;
+}
+.comb1{
+    width: 100%;
+    height: 20px;
+    font-size: xx-small; 
+    /* margin-top: 10px; */
+}
+.round{
+    width: 100%;
+   margin-left: 3%;
+}
+/* Modal */
+ion-modal#example-modal1 {
+    --width: fit-content;
+    --min-width: 250px;
+    --height: fit-content;
+    --min-height: 200px;
+    --border-radius: 6px;
+    --box-shadow: 0 28px 48px rgba(0, 0, 0, 0.4);
+  }
+  
+  ion-modal#example-modal1 h1,h2,h3 {
+    margin: 20px 20px 10px 20px;
+  }
+  ion-modal#example-modal1 ion-button {
+    margin: auto;
+  }
+  
+  ion-modal#example-modal1 ion-icon {
+    margin-right: 6px;
+  
+    width: 48px;
+    height: 48px;
+  
+    padding: 4px 0;
+  
+    color: #aaaaaa;
+  }
+  
+  ion-modal#example-modal1 .wrapper {
+    margin-bottom: 10px;
+  }
+
+/* {(achatv) ? (
+    <div>
+        <IonCol className="c1" size="6" >
+
+            <IonIcon icon={removeOutline} className='ico1' onClick={() => { decrem() }} />
+            <IonBadge color="light" className="badg" >{quantite}</IonBadge>
+            <IonIcon icon={addOutline} className='ico2' onClick={() => { increm() }} />
+
+        </IonCol>
+        <IonCol >
+            <div onClick={() => { ajout() }} ><AddToCartButton icon={true} /></div>
+
+        </IonCol>
+
+    </div>
+) : (
+    <IonButton className="comb" color="secondary" onClick={() => { setAchatv(true) }} >Commander</IonButton>
+)} */
+
+
+/* <IonRow className="r3">
+<IonCol className="c1" size="6" >
+    <IonIcon icon={removeOutline} className='ico1' onClick={() => { decrem() }} />
+    <IonBadge color="light" className="badg" >{quantite}</IonBadge>
+    <IonIcon icon={addOutline} className='ico2' onClick={() => { increm() }} />
+</IonCol>
+<IonCol >
+    <div onClick={() => { ajout() }} ><AddToCartButton icon={true} /></div>
+
+</IonCol>
+</IonRow> */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* .swiper {
+    width: 100%;
+    height: 100%;
+}
+.swiper-slide {
+    text-align: center;
+    font-size: 18px;
+    background: #fff;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+
+}
+
+.swiper-slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+body{
+    background: #eee;
+}
+
+.swiper {
+    width: 100%;
+    height: 300px;
+    margin: 20px 0;
+
+}
+
+
+ */

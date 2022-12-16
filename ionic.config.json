@@ -1,0 +1,7 @@
+{
+  "name": "IonicProjet1",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}

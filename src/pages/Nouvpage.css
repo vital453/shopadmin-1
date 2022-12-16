@@ -1,0 +1,27 @@
+.seg{
+    opacity: 1;
+    font-family: Cool jazz;
+    /* height: 20px;
+    width: 20px; */
+    /* position: absolute; */
+    
+    /* top: 7%; */
+    z-index: 2;
+}
+.rrt{
+    top: 0%; 
+    z-index: 1;
+    position: absolute;
+}
+.zer{
+    z-index: 3;
+    text-align: center;
+    
+}
+.ico{
+    margin-top: 15px;
+}
+.ripple-parent {
+    position: relative;
+    overflow: hidden;
+  }

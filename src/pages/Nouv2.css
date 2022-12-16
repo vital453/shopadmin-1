@@ -1,0 +1,83 @@
+.ser {
+    --background-activated: ;
+    --background-hover: #ff4d4d;
+    --border-radius: 16px;
+    --border-color: rgb(121, 118, 118);
+    --color: rgb(121, 118, 118);
+    --box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.listener {
+    width: 100%;
+    padding: 20px;
+    background-color: aliceblue;
+}
+
+.div11 {
+    background-color: white;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 16px;
+    margin-bottom: 10px;
+    padding-bottom: 15px;
+}
+
+.alice {
+    font-family: Cool jazz, Arial, Helvetica, sans-serif;
+    background-color: aliceblue;
+}
+
+.divn1 {
+    /* max-width: 50%;
+    width: 50%;
+    height: 150px; */
+    max-width: 45%;
+    max-height: 50%;
+    /* box-shadow: 1px 3px 2px black ;
+    border-radius: 15px; */
+    
+}
+.sims{
+    max-width: 100%;
+    max-height: 100%;
+    font-family: Cool jazz;
+    
+}
+.rang {
+    /* padding-left: 4%; */
+    justify-content: space-between;
+}
+.im11{
+    /* object-fit: cover; */
+    max-width: 100%;
+    max-height: 100%;  
+    border-radius: 10px;
+    border-bottom: 1px solid #0a0909;
+}
+.droid{
+    flex-direction: column;
+    padding-left: 30%;
+}
+.kaw{
+    font-family: Cool jazz;
+    color: deepskyblue;
+    text-align: center
+}
+
+
+.dulcem{
+    z-index: 3;
+}
+.deuxinp{
+    border: 2px solid deepskyblue;
+    border-radius: 15px;
+    text-align: center;
+    font-family: Cool jazz;
+}
+.poli{
+    margin-right: 15px;
+}
+.approv{
+    font-family: Cool jazz;
+}

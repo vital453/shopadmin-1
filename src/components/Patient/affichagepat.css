@@ -1,0 +1,13 @@
+.nbj{
+    margin-bottom: 100px;
+    color: tomato;
+}
+.shad{
+    margin: 20px;
+}
+.imp1{
+    height: 100px;
+    width: 100px;
+    /* border-radius: 50%; */
+    object-fit: cover;
+}
