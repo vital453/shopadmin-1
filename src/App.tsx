@@ -73,7 +73,7 @@ import {
   logOut,
 } from "ionicons/icons";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";   
 import { recupPan } from "./Feature/PanierSlice";
 import { recupProduct } from "./Feature/ProductSlice";
 import { recupCateg } from "./Feature/ProductSlice";
