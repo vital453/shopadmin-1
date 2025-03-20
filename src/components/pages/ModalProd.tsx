@@ -56,7 +56,7 @@ export const ModalProd: React.SFC<Ajout_utiliformprops> = ({ onclose, produit, i
     let [date, setdate] = useState("");
 
     const getprod = () => {
-        fetch('https://backend-shop.benindigital.com/afficheartcroiss').then((res) => {
+        fetch('https://backendtrader.digitalfirst.space/afficheartcroiss').then((res) => {
             const data = res.json()
             return data
         }).then((data) => {

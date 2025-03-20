@@ -70,7 +70,7 @@ export const SearchModal: React.SFC<Ajout_utiliformprops> = ({ onclose }) => {
 
 
     const getart = () => {
-        // fetch('https://backend-shop.benindigital.com/afficheart').then((res) => {
+        // fetch('https://backendtrader.digitalfirst.space/afficheart').then((res) => {
         //     const data = res.json()
         //     return data
         // }).then((data) => {
@@ -82,7 +82,7 @@ export const SearchModal: React.SFC<Ajout_utiliformprops> = ({ onclose }) => {
 
     const majstatut = () => {
 
-        Axios.post('https://backend-shop.benindigital.com/majstatut', {
+        Axios.post('https://backendtrader.digitalfirst.space/majstatut', {
             invoice: "",
         }).then((ret) => {
             if (ret.data == "success") {

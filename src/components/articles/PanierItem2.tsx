@@ -96,7 +96,7 @@ export const PanierItem2: React.SFC<Ajout_utiliformprops> = ({
   );
 
   const suppression = (ide: number | React.SetStateAction<any>) => {
-    // Axios.delete(`https://backend-shop.benindigital.com/deletepan/${ide}`).then((ret)=>{
+    // Axios.delete(`https://backendtrader.digitalfirst.space/deletepan/${ide}`).then((ret)=>{
     //     setTrash(false)
     // });
     dispatch(deleteApprovision(ide));
@@ -133,15 +133,15 @@ export const PanierItem2: React.SFC<Ajout_utiliformprops> = ({
       <IonItem key={key} lines="none" detail={false} className="cartItem">
         {/* <IonImg src="img/1cc.png" /> */}
         {/* <IonAvatar>
-                    <img src={`https://backend-shop.benindigital.com/${Ig}`} alt="card" />
+                    <img src={`https://backendtrader.digitalfirst.space/${Ig}`} alt="card" />
                 </IonAvatar> */}
         <img
           className="rounded-full w-14 h-14 object-cover"
-          src={`https://backend-shop.benindigital.com/${Ig}`}
+          src={`https://backendtrader.digitalfirst.space/${Ig}`}
           alt="card"
         />
         {/* <IonThumbnail slot="start">
-                    <img src={`https://backend-shop.benindigital.com/${Ig}`} alt="card" className='imp1'/>
+                    <img src={`https://backendtrader.digitalfirst.space/${Ig}`} alt="card" className='imp1'/>
                 </IonThumbnail> */}
         <IonLabel className="ion-padding-start ion-text-wrap ">
           <p className="labpr">{Name}</p>

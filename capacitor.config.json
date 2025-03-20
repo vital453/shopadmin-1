@@ -1,6 +1,10 @@
 {
 	"appId": "com.shop.admin",
-	"appName": "ShopAdmin",
+	"appName": "Digital Trader",
 	"webDir": "build",
 	"bundledWebRuntime": false
+	
 }
+
+
+

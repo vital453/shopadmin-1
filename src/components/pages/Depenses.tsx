@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
 import {
   IonApp,
@@ -102,6 +103,8 @@ export const Depenses: React.SFC<Ajout_utiliformprops> = ({}) => {
   const [end_caisse, setEnd_caisse] = useState<any>("rr");
   const [observation, setObservation] = useState<any>();
   const [numcompte, setNumcompte] = useState<any>();
+  const [type, settype] = useState<any>();
+  const [ids, setid] = useState<any>();
   const [nomCli, setNomCli] = useState<String>("rr");
   const [telephone, setTelephone] = useState<String>("rr");
   const [remarque, setRemarque] = useState<String>("rr");
@@ -115,6 +118,10 @@ export const Depenses: React.SFC<Ajout_utiliformprops> = ({}) => {
   const boutiqueid = useSelector((state: any) => state.auth.user);
   const accesparcompte = useSelector((state: any) => state.Hash.accesparcompte);
 
+  const [width, setWindowWidth] = useState(window.innerWidth);
+
+  const [searchText, setSearchText] = useState("");
+
   const loadData = (ev: any) => {
     setTimeout(() => {
       setNub(nub + 10);
@@ -123,7 +130,7 @@ export const Depenses: React.SFC<Ajout_utiliformprops> = ({}) => {
   };
 
   const getcom = () => {
-    // fetch('https://backend-shop.benindigital.com/affichecommande').then((res) => {
+    // fetch('https://backendtrader.digitalfirst.space/affichecommande').then((res) => {
     //     const data = res.json()
     //     return data
     // })
@@ -131,7 +138,7 @@ export const Depenses: React.SFC<Ajout_utiliformprops> = ({}) => {
     //         setCommandelist(data);
     //         console.log(data);
     //     })
-    // fetch('https://backend-shop.benindigital.com/affichecommande').then((res) => {
+    // fetch('https://backendtrader.digitalfirst.space/affichecommande').then((res) => {
     //     const data = res.json()
     //     return data
     // }).then((data) => {
@@ -145,7 +152,9 @@ export const Depenses: React.SFC<Ajout_utiliformprops> = ({}) => {
     a: String | React.SetStateAction<String>,
     s: String | React.SetStateAction<String>,
     z: String | React.SetStateAction<String>,
-    y: String | React.SetStateAction<String>
+    y: String | React.SetStateAction<String>,
+    t: String | React.SetStateAction<String>,
+    i: String | React.SetStateAction<String>
   ) => {
     setDate(n);
     setMontant(p);
@@ -153,6 +162,8 @@ export const Depenses: React.SFC<Ajout_utiliformprops> = ({}) => {
     setEnd_caisse(s);
     setObservation(z);
     setNumcompte(y);
+    settype(t);
+    setid(i);
     setShowmodal(true);
   };
 
@@ -195,122 +206,277 @@ export const Depenses: React.SFC<Ajout_utiliformprops> = ({}) => {
     },
   ];
 
+  const updateDimensions = () => {
+    // const width = window.innerWidth;
+    setWindowWidth(window.innerWidth);
+  };
+
   useEffect(() => {
     console.log(comm);
   }, []);
+
+  window.addEventListener("resize", updateDimensions);
   return (
+    // <>
+    //   {width < 500 ? (
+    //     <>
+    //       {comm[0] ? (
+    //         <>
+    //           {comm.slice(0, nub).map((card: any, index: any) => {
+    //             return (
+    //               <IonItem
+    //                 className=" Itemsv"
+    //                 onClick={() => {
+    //                   permu(
+    //                     card.date,
+    //                     card.montant,
+    //                     card.last_caisse,
+    //                     card.end_caisse,
+    //                     card.observation,
+    //                     card.numero_compte,
+    //                     card.numero_compte ? "Décaissement" : "Dépense",
+    //                     card.id
+    //                   );
+    //                 }}
+    //               >
+    //                 <IonLabel>
+    //                   <IonLabel>
+    //                     {/* <h3 className="nereide"><span className="adddate">{String(new Date(card.date)).split("(")[0]}</span><span className="add1">{new Intl.NumberFormat("de-DE", { style: "currency", currency: "XOF" }).format(card.montant)}</span></h3> */}
+    //                     {card.numero_compte ? (
+    //                       <h3 className="nereide">
+    //                         <p className=" add3 nereide">
+    //                           <span className="adddate">
+    //                             {/* {String(new Date(card.date)).split("(")[0]} */}
+    //                             {card.date.split("T")[0]} &nbsp; à &nbsp;{" "}
+    //                             {card.date.split("T")[1].split(".")[0]}
+    //                           </span>
+    //                         </p>
+    //                         <span>Décaissement: </span>
+    //                         <span className="add5">
+    //                           {new Intl.NumberFormat("de-DE", {
+    //                             style: "currency",
+    //                             currency: "XOF",
+    //                           }).format(card.montant)}
+    //                         </span>
+    //                       </h3>
+    //                     ) : (
+    //                       <h3 className="nereide">
+    //                         <p className=" add3 nereide">
+    //                           <span className="adddate">
+    //                             {/* {String(new Date(card.date)).split("(")[0]} */}
+    //                             {card.date.split("T")[0]} &nbsp; à &nbsp;{" "}
+    //                             {card.date.split("T")[1].split(".")[0]}
+    //                           </span>{" "}
+    //                         </p>
+    //                         <span>Dépense: </span>
+    //                         <span className="add5">
+    //                           {new Intl.NumberFormat("de-DE", {
+    //                             style: "currency",
+    //                             currency: "XOF",
+    //                           }).format(card.montant)}
+    //                         </span>
+    //                       </h3>
+    //                     )}
+    //                     {/* <p className=" add3" ><span className="add1">Commandes:</span>{new Intl.NumberFormat("de-DE", { style: "currency", currency: "XOF" }).format(card.total_price)}</p> */}
+    //                   </IonLabel>
+    //                 </IonLabel>
+    //               </IonItem>
+    //             );
+    //           })}
+    //           <IonInfiniteScroll
+    //             className="scroll1"
+    //             onIonInfinite={loadData}
+    //             threshold="100px"
+    //             disabled={isInfiniteDisabled}
+    //           >
+    //             <IonInfiniteScrollContent
+    //               loadingSpinner="lines-sharp-small"
+    //               loadingText="Chargement de données..."
+    //             ></IonInfiniteScrollContent>
+    //           </IonInfiniteScroll>
+    //         </>
+    //       ) : (
+    //         <>
+    //           <div className="items-center justify-center text-center mb-3">
+    //             <img className="" src="delai-de-traitement.png" alt="d" />
+    //             <h2 className="items-center justify-center text-center ">
+    //               aucune dépense
+    //             </h2>
+    //           </div>
+    //         </>
+    //       )}
+    //       <IonModal
+    //         isOpen={showmodal}
+    //         onDidDismiss={() => {
+    //           setShowmodal(false);
+    //         }}
+    //       >
+    //         <Modaldepdec
+    //           onclose={() => {
+    //             setShowmodal(false);
+    //           }}
+    //           Datec={date}
+    //           Montant={montant}
+    //           Lastcaisse={last_caisse}
+    //           Endcaisse={end_caisse}
+    //           Observation={observation}
+    //           Numcompte={numcompte}
+    //           type={type}
+    //           id={ids}
+    //           // tab={patient}
+    //         />
+    //       </IonModal>
+    //     </>
+    //   ) : (
     <>
-      {accesparcompte
-        .filter((t: any) => t.id_boutique === boutiqueid.BoutiqueId)
-        .map((bat: any) => {
-          return bat.histo_depense === 1 ? (
-            <>
+      <IonSearchbar
+        mode="ios"
+        value={searchText}
+        placeholder={"rechercher par date"}
+        className="pl-0"
+        animated={true}
+        onIonChange={(e) => {
+          setSearchText(e.detail.value!);
+          // change(e.detail.value!);
+        }}
+        onIonFocus={(e) => {
+          // dispatch(setactive_categ(""));
+          // dispatch(setactive_tendance(""));
+          // setNub(10);
+        }}
+      ></IonSearchbar>
+      <div className="p-3">
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <IonModal
+            isOpen={showmodal}
+            onDidDismiss={() => {
+              setShowmodal(false);
+            }}
+          >
+            <Modaldepdec
+              onclose={() => {
+                setShowmodal(false);
+              }}
+              Datec={date}
+              Montant={montant}
+              Lastcaisse={last_caisse}
+              Endcaisse={end_caisse}
+              Observation={observation}
+              Numcompte={numcompte}
+              type={type}
+              id={ids}
+
+              // tab={patient}
+            />
+          </IonModal>
+          <table className="table-auto w-full">
+            {/* Table header */}
+            <thead className="text-xs uppercase text-slate-400 bg-slate-50 rounded-sm">
+              <tr>
+                <th className="p-2">
+                  <div className="font-semibold text-left text-sm">
+                    Type de l'opération
+                  </div>
+                </th>
+                <th className="p-2">
+                  <div className="font-semibold text-center text-sm">
+                    Date de l'opération
+                  </div>
+                </th>
+                <th className="p-2">
+                  <div className="font-semibold text-center text-sm">
+                    Montant
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            {/* Table body */}
+            <tbody className="text-sm font-medium divide-y divide-slate-100">
+              {/* Row */}
               {comm[0] ? (
                 <>
-                  {comm.slice(0, nub).map((card: any, index: any) => {
-                    return (
-                      <IonItem
-                        className=" Itemsv"
-                        onClick={() => {
-                          permu(
-                            card.date,
-                            card.montant,
-                            card.last_caisse,
-                            card.end_caisse,
-                            card.observation,
-                            card.numero_compte
-                          );
-                        }}
-                      >
-                        <IonLabel>
-                          <IonLabel>
-                            {/* <h3 className="nereide"><span className="adddate">{String(new Date(card.date)).split("(")[0]}</span><span className="add1">{new Intl.NumberFormat("de-DE", { style: "currency", currency: "XOF" }).format(card.montant)}</span></h3> */}
-                            {card.numero_compte ? (
-                              <h3 className="nereide">
-                                <p className=" add3 nereide">
-                                  <span className="adddate">
-                                    {String(new Date(card.date)).split("(")[0]}
+                  {comm.filter(
+                    (t: any) =>
+                      t.date.toLowerCase().includes(searchText.toLowerCase())
+                    // || t.status_id_command === filtrestat
+                  )[0] ? (
+                    comm
+                      .filter(
+                        (t: any) =>
+                          t.date
+                            .toLowerCase()
+                            .includes(searchText.toLowerCase())
+                        // || t.status_id_command === filtrestat
+                      )
+                      .map((card: any, index: any) => {
+                        return (
+                          <tr
+                            onClick={() => {
+                              permu(
+                                card.date,
+                                card.montant,
+                                card.last_caisse,
+                                card.end_caisse,
+                                card.observation,
+                                card.numero_compte,
+                                card.numero_compte ? "Décaissement" : "Dépense",
+                                card.id
+                              );
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <td className="p-2">
+                              <div className="text-sm">
+                                {card.numero_compte ? (
+                                  <span className="text-neutral-900 font-semibold">
+                                    Décaissement{" "}
                                   </span>
-                                </p>
-                                <span>Décaissement: </span>
-                                <span className="add5">
-                                  {new Intl.NumberFormat("de-DE", {
-                                    style: "currency",
-                                    currency: "XOF",
-                                  }).format(card.montant)}
-                                </span>
-                              </h3>
-                            ) : (
-                              <h3 className="nereide">
-                                <p className=" add3 nereide">
-                                  <span className="adddate">
-                                    {String(new Date(card.date)).split("(")[0]}
-                                  </span>{" "}
-                                </p>
-                                <span>Dépense: </span>
-                                <span className="add5">
-                                  {new Intl.NumberFormat("de-DE", {
-                                    style: "currency",
-                                    currency: "XOF",
-                                  }).format(card.montant)}
-                                </span>
-                              </h3>
-                            )}
-                            {/* <p className=" add3" ><span className="add1">Commandes:</span>{new Intl.NumberFormat("de-DE", { style: "currency", currency: "XOF" }).format(card.total_price)}</p> */}
-                          </IonLabel>
-                        </IonLabel>
-                      </IonItem>
-                    );
-                  })}
-                  <IonInfiniteScroll
-                    className="scroll1"
-                    onIonInfinite={loadData}
-                    threshold="100px"
-                    disabled={isInfiniteDisabled}
-                  >
-                    <IonInfiniteScrollContent
-                      loadingSpinner="lines-sharp-small"
-                      loadingText="Chargement de données..."
-                    ></IonInfiniteScrollContent>
-                  </IonInfiniteScroll>
+                                ) : (
+                                  <span className="text-neutral-900 font-semibold">
+                                    Dépense{" "}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-2">
+                              <div className="text-center text-sm text-cyan-500">
+                                {card.date.split("T")[0]} &nbsp; à &nbsp;{" "}
+                                {card.date.split("T")[1].split(".")[0]}
+                                {/* {card.date.split("T")[0]} */}
+                              </div>
+                            </td>
+                            <td className="p-2">
+                              <div className="text-center text-red-600 text-sm">
+                                {new Intl.NumberFormat("de-DE", {
+                                  style: "currency",
+                                  currency: "XOF",
+                                }).format(card.montant)}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                  ) : (
+                    <div className="flex items-center justify-center h-20 bg-white w-full">
+                      <span>aucun resultat</span>
+                    </div>
+                  )}
                 </>
               ) : (
-                <>
-                  <div className="items-center justify-center text-center mb-3">
-                    <img className="" src="delai-de-traitement.png" alt="d" />
-                    <h2 className="items-center justify-center text-center ">
-                      aucune dépense
-                    </h2>
-                  </div>
-                </>
+                <div className="items-center justify-center text-center mb-3">
+                  <img className="" src="delai-de-traitement.png" alt="d" />
+                  <h2 className="items-center justify-center text-center ">
+                    aucune dépense
+                  </h2>
+                </div>
               )}
-              <IonModal
-                isOpen={showmodal}
-                onDidDismiss={() => {
-                  setShowmodal(false);
-                }}
-              >
-                <Modaldepdec
-                  onclose={() => {
-                    setShowmodal(false);
-                  }}
-                  Datec={date}
-                  Montant={montant}
-                  Lastcaisse={last_caisse}
-                  Endcaisse={end_caisse}
-                  Observation={observation}
-                  Numcompte={numcompte}
-
-                  // tab={patient}
-                />
-              </IonModal>
-            </>
-          ) : (
-            <div className="flex items-center justify-center text-2xl mt-14">
-              vous n'avez pas accès à cette page
-            </div>
-          );
-        })}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </>
+    //   )}
+    // </>
   );
 };

@@ -94,7 +94,7 @@ export const PanierItem: React.SFC<Ajout_utiliformprops> = ({
   );
   const trigg = useSelector((state: any) => state.panier.trigg);
   const suppression = (ide: number | React.SetStateAction<any>) => {
-    // Axios.delete(`https://backend-shop.benindigital.com/deletepan/${ide}`).then((ret)=>{
+    // Axios.delete(`https://backendtrader.digitalfirst.space/deletepan/${ide}`).then((ret)=>{
     //     setTrash(false)
     // });
     dispatch(deleteProduct(ide));
@@ -103,7 +103,7 @@ export const PanierItem: React.SFC<Ajout_utiliformprops> = ({
   };
   const maj = () => {
     if (quantite > 0) {
-      // Axios.put('https://backend-shop.benindigital.com/majpan', {
+      // Axios.put('https://backendtrader.digitalfirst.space/majpan', {
       //     product_quantity: parseInt(quantite),
       //     product_id: Id,
       //     price: Unit,
@@ -148,15 +148,15 @@ export const PanierItem: React.SFC<Ajout_utiliformprops> = ({
       <IonItem key={key} lines="none" detail={false} className="cartItem">
         {/* <IonImg src="img/1cc.png" /> */}
         {/* <IonAvatar className='avatar1'>
-                    <img src={`https://backend-shop.benindigital.com/${Ig}`} alt="card" />
+                    <img src={`https://backendtrader.digitalfirst.space/${Ig}`} alt="card" />
                 </IonAvatar> */}
         <img
           className="rounded-full w-14 h-14 object-cover"
-          src={`https://backend-shop.benindigital.com/${Ig}`}
+          src={`https://backendtrader.digitalfirst.space/${Ig}`}
           alt="card"
         />
         {/* <IonThumbnail slot="start">
-                    <img src={`https://backend-shop.benindigital.com/${Ig}`} alt="card" className='imp1'/>
+                    <img src={`https://backendtrader.digitalfirst.space/${Ig}`} alt="card" className='imp1'/>
                 </IonThumbnail> */}
         <IonLabel className="ion-padding-start ion-text-wrap ">
           <p className="labpr">{Name}</p>

@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-lone-blocks */
 import {
   IonButton,
   IonContent,
@@ -29,6 +32,7 @@ import {
   IonRow,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
+  IonSearchbar,
 } from "@ionic/react";
 import { NavLink } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
@@ -82,6 +86,12 @@ import { setDate } from "rsuite/esm/utils/dateUtils";
 import { ModalCom } from "./ModalCom";
 import { recupCommande } from "../../Feature/CommandeSlice";
 import { Depenses } from "./Depenses";
+import Sidebar from "../Sidebar";
+import Header from "../Header";
+import { Tresorerie } from "./Tresorerie";
+import { FiRefreshCw } from "react-icons/fi";
+import "intro.js/introjs.css";
+import introJs from "intro.js";
 
 function doRefresh(event: Event | React.SetStateAction<any>) {
   console.log("Begin async operation");
@@ -141,6 +151,7 @@ const Historique: React.FC = () => {
   const [etatstat, setEtatstat] = useState<any>(false);
   const router = useIonRouter();
   const [seg, setSeg] = useState<any>("Operations");
+  const [segg, setSegg] = useState<any>("Tous");
   const [cont, setCont] = useState<any>(window.location.pathname.split("/")[2]);
   const [titre, setTitre] = useState<any>("Votre");
   const [titre1, setTitre1] = useState<any>("Historique");
@@ -150,6 +161,11 @@ const Historique: React.FC = () => {
   const ionRouter = useIonRouter();
   const boutiqueid = useSelector((state: any) => state.auth.user);
   const accesparcompte = useSelector((state: any) => state.Hash.accesparcompte);
+  // largeur de la page
+  const [width, setWindowWidth] = useState(window.innerWidth);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [searchText, setSearchText] = useState("");
 
   const loadData = (ev: any) => {
     setTimeout(() => {
@@ -167,7 +183,7 @@ const Historique: React.FC = () => {
   });
 
   const getpan = () => {
-    fetch("https://backend-shop.benindigital.com/affichepanier")
+    fetch("https://backendtrader.digitalfirst.space/affichepanier")
       .then((res) => {
         const data = res.json();
         return data;
@@ -176,7 +192,7 @@ const Historique: React.FC = () => {
   };
 
   const getcom = () => {
-    Axios.post("https://backend-shop.benindigital.com/affichecommande", {
+    Axios.post("https://backendtrader.digitalfirst.space/affichecommande", {
       id_boutique: userid.BoutiqueId,
     }).then((ret) => {
       dispatch(recupCommande(ret.data));
@@ -206,6 +222,11 @@ const Historique: React.FC = () => {
   };
 
   const relance = () => {};
+  // MAJ des dimensions
+  const updateDimensions = () => {
+    // const width = window.innerWidth;
+    setWindowWidth(window.innerWidth);
+  };
 
   useEffect(() => {
     console.log(trigger);
@@ -220,36 +241,107 @@ const Historique: React.FC = () => {
     getcom();
   }, []);
 
-  return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonButton onClick={() => router.goBack()}>
-              <IonIcon color="medium" icon={chevronBack} />
-            </IonButton>
-          </IonButtons>
-          <IonTitle className="nereide">{seg}</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     const step1Element = document.querySelector("#step22");
 
-      <IonContent fullscreen className="alice">
-        <IonHeader collapse="condense" mode="ios">
+  //     if (step1Element) {
+  //       const intro = introJs()
+  //         .setOptions({
+  //           steps: [
+  //             {
+  //               element: step1Element,
+  //               intro: "Ici ce trouve la navigation des differents historiques",
+  //             },
+  //           ],
+  //           nextLabel: "Suivant",
+  //           prevLabel: "Retour",
+  //           doneLabel: "Terminer",
+  //         })
+  //         .start();
+  //     }
+  //     return () => {
+  //       introJs().exit();
+  //     };
+  //   }, 200);
+  // }, []);
+
+  window.addEventListener("resize", updateDimensions);
+
+  if (width < 500) {
+    return (
+      <IonPage>
+        <IonHeader>
           <IonToolbar>
-            <IonTitle size="large" className="page-title">
-              <IonLabel>{titre} </IonLabel>
-              <IonNote>{titre1}</IonNote>
-            </IonTitle>
+            <div className="flex justify-between items-center">
+              <IonButtons slot="start">
+                <IonButton
+                  onClick={() => {
+                    router.goBack();
+                    // setShowmodal(false);
+                  }}
+                >
+                  <IonIcon color="medium" icon={chevronBack} />
+                </IonButton>
+              </IonButtons>
+              <IonTitle className="nereide">Digital trader</IonTitle>
+
+              <IonButtons
+                slot="end"
+                className="mr-5 text-xl cursor-pointer"
+                onClick={() => {
+                  window.location.href = "/Historique/0";
+                }}
+              >
+                <FiRefreshCw />
+              </IonButtons>
+            </div>
+            {/* <IonButtons slot="start">
+              <IonButton onClick={() => router.goBack()}>
+                <IonIcon color="medium" icon={chevronBack} />
+              </IonButton>
+            </IonButtons>
+            <IonTitle className="nereide">{seg}</IonTitle> */}
           </IonToolbar>
         </IonHeader>
-        <IonList className="homes">
-          {cont == 1 ? (
-            <>
-              {accesparcompte
-                .filter((t: any) => t.id_boutique === boutiqueid.BoutiqueId)
-                .map((bat: any) => {
-                  return bat.gestion_commande_attente === 1 ? (
-                    <div className="div2">
+
+        <IonContent fullscreen className="alice">
+          <IonHeader collapse="condense" mode="ios">
+            <IonToolbar>
+              <IonTitle size="large" className="page-title">
+                <IonLabel>{titre} </IonLabel>
+                <IonNote>{titre1}</IonNote>
+              </IonTitle>
+            </IonToolbar>
+          </IonHeader>
+          <IonList className="homes">
+            {cont === "1" ? (
+              <>
+                <div className="div2">
+                  <table className="table-auto w-full">
+                    {/* Table header */}
+                    <thead className="text-xs uppercase text-slate-400 bg-slate-50 rounded-sm">
+                      <tr>
+                        <th className="p-2">
+                          <div className="font-semibold text-left text-sm">
+                            Type de l'opération
+                          </div>
+                        </th>
+                        <th className="p-2">
+                          <div className="font-semibold text-center text-sm">
+                            Date de l'opération
+                          </div>
+                        </th>
+                        <th className="p-2">
+                          <div className="font-semibold text-center text-sm">
+                            Montant
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    {/* Table body */}
+                    <tbody className="text-sm font-medium divide-y divide-slate-100">
+                      {/* Row */}
                       {comm
                         .slice(0, nub)
                         .filter((e: any) => e.status_id_command < 3) ? (
@@ -258,8 +350,7 @@ const Historique: React.FC = () => {
                             .filter((e: any) => e.status_id_command < 3)
                             .map((card: any, index: any) => {
                               return (
-                                <IonItem
-                                  className=" Itemsv"
+                                <tr
                                   onClick={() => {
                                     permu(
                                       card.date,
@@ -269,34 +360,30 @@ const Historique: React.FC = () => {
                                       card.whatsapp
                                     );
                                   }}
+                                  className="cursor-pointer"
                                 >
-                                  <IonLabel>
-                                    <h3 className="nereide">
-                                      <span className="add1">
-                                        {card.whatsapp}
-                                      </span>{" "}
-                                      <span className="adddate">
-                                        {
-                                          String(new Date(card.date)).split(
-                                            "("
-                                          )[0]
-                                        }
-                                      </span>{" "}
-                                      <span className="add2">
-                                        {card.invoice}
-                                      </span>{" "}
-                                    </h3>
-                                    <p className=" add3">
-                                      <span className="add1">Commandes:</span>
-                                      <span className="add5">
-                                        {new Intl.NumberFormat("de-DE", {
-                                          style: "currency",
-                                          currency: "XOF",
-                                        }).format(card.total_price)}
-                                      </span>
-                                    </p>
-                                  </IonLabel>
-                                </IonItem>
+                                  <td className="p-2">
+                                    <div className="text-sm">Commandes</div>
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="text-center text-sm text-cyan-500">
+                                      {card.date.split("T")[0]} &nbsp; à &nbsp;{" "}
+                                      {card.date.split("T")[1].split(".")[0] ===
+                                      "00:00:00"
+                                        ? ""
+                                        : card.date.split("T")[1].split(".")[0]}
+                                      {/* {card.date.split("T")[0]} */}
+                                    </div>
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="text-center text-red-600 text-sm">
+                                      {new Intl.NumberFormat("de-DE", {
+                                        style: "currency",
+                                        currency: "XOF",
+                                      }).format(card.total_price)}
+                                    </div>
+                                  </td>
+                                </tr>
                               );
                             })}
                           <IonInfiniteScroll
@@ -312,83 +399,239 @@ const Historique: React.FC = () => {
                           </IonInfiniteScroll>
                         </>
                       ) : (
-                        <>
-                          <div className="items-center justify-center text-center mb-3">
-                            <img
-                              className=""
-                              src="delai-de-traitement.png"
-                              alt="d"
-                            />
-                            <h2 className="items-center justify-center text-center ">
-                              aucune commande en cours
-                            </h2>
-                          </div>
-                        </>
+                        <div className="items-center justify-center text-center mb-3">
+                          <img
+                            className=""
+                            src="delai-de-traitement.png"
+                            alt="d"
+                          />
+                          <h2 className="items-center justify-center text-center ">
+                            aucune commande en cours
+                          </h2>
+                        </div>
                       )}
-                    </div>
+                    </tbody>
+                  </table>
+                  {/* {comm
+                    .slice(0, nub)
+                    .filter((e: any) => e.status_id_command < 3) ? (
+                    <>
+                      {comm
+                        .filter((e: any) => e.status_id_command < 3)
+                        .map((card: any, index: any) => {
+                          return (
+                            <IonItem
+                              className=" Itemsv"
+                              onClick={() => {
+                                permu(
+                                  card.date,
+                                  card.invoice,
+                                  card.status_id_command,
+                                  card.total_price,
+                                  card.whatsapp
+                                );
+                              }}
+                            >
+                              <IonLabel>
+                                <h3 className="nereide">
+                                  <span className="add1">{card.whatsapp}</span>{" "}
+                                  <span className="adddate">
+                                    {card.date.split("T")[0]} &nbsp; à &nbsp;{" "}
+                                    {card.date.split("T")[1].split(".")[0]}
+                                  </span>{" "}
+                                  <span className="add2">{card.invoice}</span>{" "}
+                                </h3>
+                                <p className=" add3">
+                                  <span className="add1">Commandes:</span>
+                                  <span className="add5">
+                                    {new Intl.NumberFormat("de-DE", {
+                                      style: "currency",
+                                      currency: "XOF",
+                                    }).format(card.total_price)}
+                                  </span>
+                                </p>
+                              </IonLabel>
+                            </IonItem>
+                          );
+                        })}
+                      
+                    </>
                   ) : (
-                    <div className="flex items-center justify-center text-2xl mt-14">
-                      vous n'avez pas accès à cette page
-                    </div>
-                  );
-                })}
-            </>
-          ) : (
-            <div>
-              <IonSegment
-                className="nereide"
-                onIonChange={(e) => {
-                  setSeg(e.detail.value);
-                }}
-                value={seg}
-                scrollable={true}
-                mode="ios"
-              >
-                <IonSegmentButton value="Operations">
-                  <IonLabel>Operations</IonLabel>
-                </IonSegmentButton>
-                <IonSegmentButton value="Ventes">
-                  <IonLabel>Ventes</IonLabel>
-                </IonSegmentButton>
-                <IonSegmentButton value="Depenses">
-                  <IonLabel>Depenses</IonLabel>
-                </IonSegmentButton>
-                <IonSegmentButton value="Approvisionnement">
-                  <IonLabel className="adin">Approvision...</IonLabel>
-                </IonSegmentButton>
-              </IonSegment>
-              <div className="div2">
-                {seg == "Ventes" ? <Commandes /> : null}
-                {seg == "Approvisionnement" ? <Approvisionnement /> : null}
-                {seg == "Operations" ? <Operations /> : null}
-                {seg == "Depenses" ? <Depenses /> : null}
+                    <>
+                      <div className="items-center justify-center text-center mb-3">
+                        <img
+                          className=""
+                          src="delai-de-traitement.png"
+                          alt="d"
+                        />
+                        <h2 className="items-center justify-center text-center ">
+                         
+                        </h2>
+                      </div>
+                    </>
+                  )} */}
+                </div>
+              </>
+            ) : (
+              <div>
+                <IonSegment
+                  className="nereide"
+                  onIonChange={(e) => {
+                    setSegg(e.detail.value);
+                  }}
+                  value={segg}
+                  scrollable={true}
+                  mode="ios"
+                  id="step22"
+                >
+                  <IonSegmentButton value="Tous">
+                    <IonLabel>Tous</IonLabel>
+                  </IonSegmentButton>
+                  <IonSegmentButton value="Operations">
+                    <IonLabel>Operations</IonLabel>
+                  </IonSegmentButton>
+                  <IonSegmentButton value="Depenses">
+                    <IonLabel>Dépenses</IonLabel>
+                  </IonSegmentButton>
+                  <IonSegmentButton value="Approvisionnement">
+                    <IonLabel className="adin">Approvisi...</IonLabel>
+                  </IonSegmentButton>
+                  <IonSegmentButton value="Tresorerie">
+                    <IonLabel className="adin">Trésorerie</IonLabel>
+                  </IonSegmentButton>
+                </IonSegment>
+
+                <div className="div2">
+                  {segg === "Operations" ? <Commandes /> : null}
+                  {segg === "Approvisionnement" ? <Approvisionnement /> : null}
+                  {segg === "Tous" ? <Operations /> : null}
+                  {segg === "Depenses" ? <Depenses /> : null}
+                  {segg === "Tresorerie" ? <Tresorerie /> : null}
+                </div>
+              </div>
+              // <div>
+              //   <IonSegment
+              //     className="nereide"
+              //     onIonChange={(e) => {
+              //       setSeg(e.detail.value);
+              //     }}
+              //     value={seg}
+              //     scrollable={true}
+              //     mode="ios"
+              //   >
+              //     <IonSegmentButton value="Operations">
+              //       <IonLabel>Operations</IonLabel>
+              //     </IonSegmentButton>
+              //     <IonSegmentButton value="Ventes">
+              //       <IonLabel>Ventes</IonLabel>
+              //     </IonSegmentButton>
+              //     <IonSegmentButton value="Depenses">
+              //       <IonLabel>Depenses</IonLabel>
+              //     </IonSegmentButton>
+              //     <IonSegmentButton value="Approvisionnement">
+              //       <IonLabel className="adin">Approvisi...</IonLabel>
+              //     </IonSegmentButton>
+
+              //   </IonSegment>
+              //   <div className="div2">
+              //     {seg === "Ventes" ? <Commandes /> : null}
+              //     {seg === "Approvisionnement" ? <Approvisionnement /> : null}
+              //     {seg === "Operations" ? <Operations /> : null}
+              //     {seg === "Depenses" ? <Depenses /> : null}
+              //   </div>
+              // </div>
+            )}
+          </IonList>
+        </IonContent>
+        <IonModal
+          isOpen={showmodal}
+          onDidDismiss={() => {
+            setShowmodal(false);
+          }}
+        >
+          <ModalCom
+            onclose={() => {
+              setShowmodal(false);
+              getcom();
+            }}
+            Invoice={invoice}
+            Prix={prixt}
+            Datec={date}
+            Statut={statut}
+            Etat={etatstat}
+            Whatsapp={whatsapp}
+            // tab={patient}
+          />
+        </IonModal>
+      </IonPage>
+    );
+  } else {
+    return (
+      <div className="flex h-screen overflow-hidden">
+        {/* Sidebar */}
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
+        {/* Content area */}
+        <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+          {/*  Site header */}
+          <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
+          <main>
+            <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+              {/* <div className="w-full flex items-center bg-navbgcolor  my-2 rounded-lg px-2 py-2 gap-2">
+                <div className="w-1/4 bg-white text-center rounded-xl py-1">
+                  <h3 className="text-sm">Operations</h3>
+                </div>
+                <div className="w-1/4 bg-white text-center rounded-xl py-1">
+                  <h3 className="text-sm">Ventes</h3>
+                </div>
+                <div className="w-1/4 bg-white text-center rounded-xl py-1">
+                  <h3 className="text-sm">Dépenses et Décaissement</h3>
+                </div>
+                <div className="w-1/4 bg-white text-center rounded-xl py-1">
+                  <h3 className="text-sm">Approvisionnement</h3>
+                </div>
+              </div> */}
+              <div>
+                <IonSegment
+                  className="nereide"
+                  onIonChange={(e) => {
+                    setSegg(e.detail.value);
+                  }}
+                  value={segg}
+                  scrollable={true}
+                  mode="ios"
+                >
+                  <IonSegmentButton value="Tous">
+                    <IonLabel>Tous</IonLabel>
+                  </IonSegmentButton>
+                  <IonSegmentButton value="Operations">
+                    <IonLabel>Operations</IonLabel>
+                  </IonSegmentButton>
+                  <IonSegmentButton value="Depenses">
+                    <IonLabel>Dépenses</IonLabel>
+                  </IonSegmentButton>
+                  <IonSegmentButton value="Approvisionnement">
+                    <IonLabel className="adin">Approvisionnement</IonLabel>
+                  </IonSegmentButton>
+                  <IonSegmentButton value="Tresorerie">
+                    <IonLabel className="adin">Trésorerie</IonLabel>
+                  </IonSegmentButton>
+                </IonSegment>
+                <div className="div2">
+                  {segg === "Operations" ? <Commandes /> : null}
+                  {segg === "Approvisionnement" ? <Approvisionnement /> : null}
+                  {segg === "Tous" ? <Operations /> : null}
+                  {segg === "Depenses" ? <Depenses /> : null}
+                  {segg === "Tresorerie" ? <Tresorerie /> : null}
+                </div>
               </div>
             </div>
-          )}
-        </IonList>
-      </IonContent>
-      <IonModal
-        isOpen={showmodal}
-        onDidDismiss={() => {
-          setShowmodal(false);
-        }}
-      >
-        <ModalCom
-          onclose={() => {
-            setShowmodal(false);
-            getcom();
-          }}
-          Invoice={invoice}
-          Prix={prixt}
-          Datec={date}
-          Statut={statut}
-          Etat={etatstat}
-          Whatsapp={whatsapp}
-          // tab={patient}
-        />
-      </IonModal>
-    </IonPage>
-  );
+          </main>
+        </div>
+      </div>
+    );
+  }
 };
 
 export default Historique;

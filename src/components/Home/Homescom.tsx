@@ -1,3 +1,5 @@
+/* eslint-disable no-lone-blocks */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ModalExample1 } from "./ModalExample1";
 import { useEffect, useState } from "react";
 import {
@@ -79,6 +81,8 @@ import {
   deccont,
 } from "../../Feature/PanierSlice";
 import { recupCommande } from "../../Feature/CommandeSlice";
+import "intro.js/introjs.css";
+import introJs from "intro.js";
 
 interface Ajout_utiliformprops {
   Panier: [][];
@@ -121,20 +125,19 @@ export const Homescom: React.SFC<Ajout_utiliformprops> = ({ Panier }) => {
   const dispatch = useDispatch();
   const [searchText, setSearchText] = useState("");
   const [isInfiniteDisabled, setInfiniteDisabled] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(true);
 
   const loadData = (ev: any) => {
     setTimeout(() => {
-      setNub(nub + 8)
+      setNub(nub + 8);
       ev.target.complete();
     }, 500);
-  }
-  
-
+  };
 
   const getpatient = () => {};
 
   const getart = () => {
-    fetch("https://backend-shop.benindigital.com/afficheart")
+    fetch("https://backendtrader.digitalfirst.space/afficheart")
       .then((res) => {
         const data = res.json();
         return data;
@@ -188,17 +191,85 @@ export const Homescom: React.SFC<Ajout_utiliformprops> = ({ Panier }) => {
 
   useEffect(() => {
     getcat();
-
-    // console.log(article);
   }, []);
+
+  // useEffect(() => {
+  //   // const showTutorial = localStorage.getItem('showTutorial');
+  //   const step1Element = document.querySelector("#step3");
+  //   const step2Element = document.querySelector("#step4");
+  //   // if (showTutorial === null || showTutorial === 'true') {
+  //   if (step1Element && step2Element) {
+  //     introJs()
+  //       .setOptions({
+  //         steps: [
+  //           {
+  //             element: step1Element,
+  //             intro: "Ceci est la zone de recherche",
+  //             // tooltipClass: 'custom-class',
+  //           },
+  //           {
+  //             element: step2Element,
+  //             intro:
+  //               "Ceci est la d'affichage des differents produits pour la vente",
+  //             // tooltipClass: 'custom-class',
+  //           },
+  //         ],
+  //         nextLabel: "Suivant",
+  //         prevLabel: "Retour",
+  //         doneLabel: "Terminer",
+  //       })
+  //       .start();
+  //     // localStorage.setItem('showTutorial', 'false');
+  //   }
+  //   // }
+  //   return () => {
+  //     introJs().exit(); // Ajoute cette ligne pour arrêter l'introduction lorsque le composant est démonté
+  //   };
+  // }, []);
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     const step1Element = document.querySelector("#step3");
+  //     const step2Element = document.querySelector("#step4");
+  
+  //     if (showTutorial && step1Element && step2Element && article[0]) {
+  //       const intro = introJs()
+  //         .setOptions({
+  //           steps: [
+  //             {
+  //               element: step1Element,
+  //               intro: "Ceci est la zone de recherche",
+  //             },
+  //             {
+  //               element: step2Element,
+  //               intro:
+  //                 "Ceci est la zone d'affichage des différents produits pour la vente",
+  //             },
+  //           ],
+  //           nextLabel: "Suivant",
+  //           prevLabel: "Retour",
+  //           doneLabel: "Terminer",
+  //         })
+  //         .onexit(() => {
+  //           setShowTutorial(false);
+  //         });
+  //       intro.start();
+  //     }
+  //     return () => {
+  //       introJs().exit(); 
+  //     };
+  //   }, 200);
+  
+  // }, [showTutorial]);
+
   return (
     <div className="alice">
       <div className="div1">
         <IonHeader collapse="condense" mode="ios">
           <IonToolbar>
             <IonTitle size="large" className="page-title">
-              <IonLabel>Votre </IonLabel>
-              <IonNote>Boutique</IonNote>
+              <IonLabel>Gestion </IonLabel>
+              <IonNote>Vente</IonNote>
             </IonTitle>
           </IonToolbar>
         </IonHeader>
@@ -207,6 +278,7 @@ export const Homescom: React.SFC<Ajout_utiliformprops> = ({ Panier }) => {
           <div className="divcom">
             <IonSearchbar
               value={searchText}
+              id="step3"
               animated={true}
               placeholder="Rechercher un Produit"
               onIonChange={(e) => {
@@ -214,23 +286,26 @@ export const Homescom: React.SFC<Ajout_utiliformprops> = ({ Panier }) => {
                 change(e.detail.value!);
               }}
             ></IonSearchbar>
-            <IonGrid className="grid1">
+            <IonGrid className="grid1" id="step4">
               <IonRow>
                 {article[0] ? (
                   <>
-                    {(article
+                    {article
                       .filter((t: any) =>
                         t.name.toLowerCase().includes(searchText.toLowerCase())
-                      ).slice(0, nub))
+                      )
+                      .slice(0, nub)
                       .map((card: any, index: any) => {
                         return (
                           <IonCol key={index} className="dril">
                             <Conteneur
                               Nom={card.name}
                               Prix={card.price}
-                              Id={card.id} 
+                              Id={card.id}
                               Stock={card.stock}
                               Ig={card.picture1}
+                              quantifiable_product={card.quantifiable_product}
+                              type_product={card.type_product}
                               Panier={Panier}
                             />
                           </IonCol>
@@ -240,11 +315,7 @@ export const Homescom: React.SFC<Ajout_utiliformprops> = ({ Panier }) => {
                 ) : (
                   <>
                     <div className="items-center justify-center text-center">
-                      <img
-                        className=""
-                        src="delai-de-traitement.png"
-                        alt="d"
-                      />
+                      <img className="" src="delai-de-traitement.png" alt="d" />
                       <h2 className="items-center justify-center text-center">
                         aucun article enrégistré
                       </h2>
@@ -256,11 +327,11 @@ export const Homescom: React.SFC<Ajout_utiliformprops> = ({ Panier }) => {
                 onIonInfinite={loadData}
                 threshold="100px"
                 disabled={isInfiniteDisabled}
-              ><IonInfiniteScrollContent
-                loadingSpinner="lines-sharp-small"
-                loadingText="Chargement de données..."
               >
-                </IonInfiniteScrollContent>
+                <IonInfiniteScrollContent
+                  loadingSpinner="lines-sharp-small"
+                  loadingText="Chargement de données..."
+                ></IonInfiniteScrollContent>
               </IonInfiniteScroll>
             </IonGrid>
           </div>

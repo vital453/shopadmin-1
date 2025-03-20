@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-lone-blocks */
 /* eslint-disable react/jsx-no-target-blank */
 /* eslint-disable jsx-a11y/img-redundant-alt */
 /* eslint-disable react/jsx-pascal-case */
@@ -22,8 +24,16 @@ import {
   IonProgressBar,
   IonToast,
 } from "@ionic/react";
-import { setBadge, setBoutiquecompte, setHash_code } from "../../Feature/HashSlice";
+import {
+  setBadge,
+  setBoutiquecompte,
+  setchoiceacces,
+  setHash_code,
+} from "../../Feature/HashSlice";
 import { BsEyeFill, BsEyeSlashFill, BsFillEyeSlashFill } from "react-icons/bs";
+import toast, { Toaster } from "react-hot-toast";
+import { Capacitor } from "@capacitor/core";
+import { App } from "@capacitor/app";
 
 const Login = () => {
   const [username, setusername] = useState("");
@@ -43,11 +53,11 @@ const Login = () => {
   const [visible, setvisible] = useState(false);
   const valtexte = visible ? "text" : "password";
 
-  const verifhash1 = () => {
+  const verifhash1 = (id_compte) => {
     // console.log(user.auth);
     // const valo = parseInt(userid.userId);
     // console.log(8);
-    Axios.post("https://backend-shop.benindigital.com/exithash", {
+    Axios.post("https://backendtrader.digitalfirst.space/exithash", {
       id: JSON.parse(localStorage.getItem("user") + "").userId,
     }).then((ret) => {
       console.log(ret.data.message);
@@ -57,7 +67,7 @@ const Login = () => {
         // recupe_boutique();
 
         Axios.post(
-          "https://backend-shop.benindigital.com/afficheboutiqueparcompte",
+          "https://backendtrader.digitalfirst.space/afficheboutiqueparcompte",
           {
             idcompte: JSON.parse(localStorage.getItem("user") + "").userId,
           }
@@ -65,8 +75,9 @@ const Login = () => {
           dispatch(setBoutiquecompte(ret.data));
           if (JSON.parse(localStorage.getItem("badge") + "")) {
             dispatch(setBadge(JSON.parse(localStorage.getItem("badge") + "")));
-          }else{
-            dispatch(setBadge(ret.data[0].id));
+          } else {
+            console.log(ret.data[0].id, "je viens de faire ceci");
+            dispatch(setBadge(parseInt(ret.data[0].id)));
           }
           console.log(ret.data);
           const y = new Date(ret.data.date_end);
@@ -82,7 +93,7 @@ const Login = () => {
           if (numberday > 0 && numberday <= 10) {
             console.log("entre 1 et 10");
             setJoursrest(numberday);
-            Axios.post("https://backend-shop.benindigital.com/majvalidity", {
+            Axios.post("https://backendtrader.digitalfirst.space/majvalidity", {
               id: ret.data.id_actif,
               validity: numberday,
             }).then((ret) => {
@@ -91,33 +102,128 @@ const Login = () => {
           } else if (numberday <= 0) {
             setJoursrest(0);
             console.log("en dessous de 0 OU EGAL A 0");
-            Axios.post("https://backend-shop.benindigital.com/majvalidhash", {
+            Axios.post("https://backendtrader.digitalfirst.space/majvalidhash", {
               id: ret.data.id_actif,
               status_hash: "NON ACTIF",
             }).then((ret) => {
               console.log(ret.data);
             });
-            
           } else if (numberday > 10) {
             console.log("AU DELA DE 10");
-            Axios.post("https://backend-shop.benindigital.com/validityday", {
+            Axios.post("https://backendtrader.digitalfirst.space/validityday", {
               id: ret.data.id_actif,
               validity: numberday,
             }).then((ret) => {
               console.log(ret.data);
             });
           }
-          window.location.href = "/home";
+
+          Axios.post(
+            "https://backendtrader.digitalfirst.space/verif_create_acces",
+            {
+              id_compte: id_compte,
+            }
+          ).then((ret) => {
+            if (ret.data === "acces principal creer pour ce compte") {
+              setprogress(false);
+              setusername("");
+              setpassword("");
+              window.location.href = "/gestion_droit_dacces";
+            } else if (ret.data === "aucun acces creer pour ce compte") {
+              setprogress(false);
+              setusername("");
+              setpassword("");
+              dispatch(setchoiceacces("aucun"));
+              window.location.href = "/home";
+            }
+          });
         });
-        
       } else if (ret.data.message === "aucun hash actif") {
+        setprogress(false);
+        setusername("");
+        setpassword("");
         window.location.href = "/licence";
-        setDelaiactif(false);
-        console.log("2");
+
+        // Axios.post(
+        //   "https://backendtrader.digitalfirst.space/afficheboutiqueparcompte",
+        //   {
+        //     idcompte: JSON.parse(localStorage.getItem("user") + "").userId,
+        //   }
+        // ).then((ret) => {
+        //   dispatch(setBoutiquecompte(ret.data));
+        //   if (JSON.parse(localStorage.getItem("badge") + "")) {
+        //     dispatch(setBadge(JSON.parse(localStorage.getItem("badge") + "")));
+        //   } else {
+        //     console.log(ret.data[0].id);
+        //     dispatch(setBadge(parseInt(ret.data[0].id)));
+        //     Axios.post(
+        //       "https://backendtrader.digitalfirst.space/verif_create_acces",
+        //       {
+        //         id_compte: id_compte,
+        //       }
+        //     ).then((ret) => {
+        //       if (ret.data === "acces principal creer pour ce compte") {
+        //         setprogress(false);
+        //         setusername("");
+        //         setpassword("");
+        //         window.location.href = "/licence";
+        //         setDelaiactif(false);
+        //         console.log("2");
+        //       } else if (ret.data === "aucun acces creer pour ce compte") {
+        //         setprogress(false);
+        //         setusername("");
+        //         setpassword("");
+        //         dispatch(setchoiceacces("aucun"));
+        //         window.location.href = "/licence";
+        //         setDelaiactif(false);
+        //         console.log("2");
+        //       }
+        //     });
+        //   }
+        // });
       } else if (ret.data.message === "aucun hash atribuer") {
+        setprogress(false);
+        setusername("");
+        setpassword("");
         window.location.href = "/licence";
-        setDelaiactif(false);
-        console.log("3");
+
+        // Axios.post(
+        //   "https://backendtrader.digitalfirst.space/afficheboutiqueparcompte",
+        //   {
+        //     idcompte: JSON.parse(localStorage.getItem("user") + "").userId,
+        //   }
+        // ).then((ret) => {
+        //   dispatch(setBoutiquecompte(ret.data));
+        //   if (JSON.parse(localStorage.getItem("badge") + "")) {
+        //     dispatch(setBadge(JSON.parse(localStorage.getItem("badge") + "")));
+        //   } else {
+        //     console.log(ret.data[0].id);
+        //     dispatch(setBadge(parseInt(ret.data[0].id)));
+        //     Axios.post(
+        //       "https://backendtrader.digitalfirst.space/verif_create_acces",
+        //       {
+        //         id_compte: id_compte,
+        //       }
+        //     ).then((ret) => {
+        //       if (ret.data === "acces principal creer pour ce compte") {
+        //         setprogress(false);
+        //         setusername("");
+        //         setpassword("");
+        //         window.location.href = "/licence";
+        //         setDelaiactif(false);
+        //         console.log("3");
+        //       } else if (ret.data === "aucun acces creer pour ce compte") {
+        //         setprogress(false);
+        //         setusername("");
+        //         setpassword("");
+        //         dispatch(setchoiceacces("aucun"));
+        //         window.location.href = "/licence";
+        //         setDelaiactif(false);
+        //         console.log("3");
+        //       }
+        //     });
+        //   }
+        // });
       }
     });
   };
@@ -125,7 +231,7 @@ const Login = () => {
   const login = () => {
     if (!username) {
       setIfUsername(true);
-      setTimeout(() => {
+      setTimeout(() => { 
         setIfUsername(false);
       }, [4000]);
     } else {
@@ -143,7 +249,15 @@ const Login = () => {
     if (username && password) {
       // setShowLoading(true)
       setprogress(true);
-      Axios.post("https://backend-shop.benindigital.com/loginn", {
+      setTimeout(() => {
+        toast.loading(
+          "Chargement des données en cours....\n\nVeuillez patienter.",
+          {
+            duration: 60000,
+          }
+        );
+      }, 1000);
+      Axios.post("https://backendtrader.digitalfirst.space/loginn", {
         username: username,
         password: password,
         type: type,
@@ -170,7 +284,6 @@ const Login = () => {
           }
         } else {
           // console.log(response.data);
-          setprogress(false);
           dispatch(
             setCredentials({
               userId: response.data.result[0].id,
@@ -178,17 +291,21 @@ const Login = () => {
               token: response.data.token,
               auth: response.data.auth,
               BoutiqueId: response.data.idbout,
+              email: response.data.result[0].email,
             })
           );
+          localStorage.setItem("authentificator", String(response.data.auth));
+          // localStorage.setItem("email", String(response.data.result[0].email));
+          // if(){
+
+          // }
           // [response.data.result[0].id, response.data.token, response.data.auth]
           // localStorage.setItem('token', response.data.token);
           // sessionStorage.setItem('token', response.data.token);
           // setloginStatus(true);
           // setShowToast(false)
-          setusername("");
-          setpassword("");
           // setTimeout(() => {
-          verifhash1();
+          verifhash1(response.data.result[0].id);
           // }, [2000]);
           // setloginStatus(response.data[0].username);
         }
@@ -197,7 +314,7 @@ const Login = () => {
   };
   const recupe_hash = () => {
     try {
-      fetch("https://backend-shop.benindigital.com/list_hash")
+      fetch("https://backendtrader.digitalfirst.space/list_hash")
         .then((res) => {
           const data = res.json();
           return data;
@@ -212,7 +329,7 @@ const Login = () => {
   // const recupe_boutique = () => {
   //   try {
   //     Axios.post(
-  //       "https://backend-shop.benindigital.com/afficheboutiqueparcompte",
+  //       "https://backendtrader.digitalfirst.space/afficheboutiqueparcompte",
   //       {
   //         idcompte: JSON.parse(localStorage.getItem("user") + "").BoutiqueId,
   //       }
@@ -227,6 +344,23 @@ const Login = () => {
     recupe_hash();
     // recupe_boutique();
   }, []);
+
+  const sortir = () => {
+    localStorage.removeItem("estDejaLance");
+    setTimeout(() => {
+      App.exitApp();
+    }, 1000);
+  };
+
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      App.addListener("backButton", () => {
+        if (window.location.pathname === "/login") {
+          sortir();
+        }
+      });
+    }
+  });
   return (
     <IonPage>
       {/* <IonLoading
@@ -236,11 +370,16 @@ const Login = () => {
         message={"Please wait..."}
         // duration={5000}
       /> */}
+      
+      <div>{progress && <Toaster />}</div>
       <IonContent>
-        <div class="w-full flex items-center min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
+        <div
+          class="w-full flex items-center min-h-screen p-6 bg-gray-50 dark:bg-gray-900"
+          onke
+        >
           <div class="w-full flex-1 h-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl dark:bg-gray-800">
             <div class="w-full flex flex-col overflow-y-auto md:flex-row">
-              {/* <div class="h-32 md:h-auto md:w-1/2">
+              <div class="h-32 md:h-auto md:w-1/2">
                 <img
                   aria-hidden="true"
                   class="object-cover w-full h-full dark:hidden"
@@ -253,7 +392,7 @@ const Login = () => {
                   src="login-office-dark.jpeg"
                   alt="Office"
                 />
-              </div> */}
+              </div>
               <div class="w-full flex items-center justify-center p-6 sm:p-12 md:w-1/2">
                 <div class="w-full flex flex-col">
                   {/* <div className="w-full items-center justify-center text-center">
@@ -321,7 +460,7 @@ const Login = () => {
                     </>
                   ) : (
                     <a
-                      class="block w-full no-underline px-4 py-2 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-deep_sky_blue border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+                      class="block cursor-pointer w-full no-underline px-4 py-2 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-deep_sky_blue border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
                       onClick={login}
                     >
                       Connexion
@@ -346,14 +485,24 @@ const Login = () => {
                       Forgot your password?
                     </Link>
                   </p> */}
-                  <p class="mt-1">
-                    <Link
-                      class="text-sm no-underline font-medium text-deep_sky_blue dark:text-deep_sky_blue hover:underline"
-                      to={"/reg"}
-                    >
-                      Créer un compte
-                    </Link>
-                  </p>
+                  <div className="flex mt-1 mb-4 justify-between">
+                    <p class="">
+                      <Link
+                        class="text-sm no-underline font-medium text-deep_sky_blue dark:text-deep_sky_blue hover:underline"
+                        to={"/reg"}
+                      >
+                        Créer un compte
+                      </Link>
+                    </p>
+                    <p class="">
+                      <Link
+                        class="text-sm no-underline font-medium text-deep_sky_blue dark:text-deep_sky_blue hover:underline"
+                        to={"/forgot_password"}
+                      >
+                        Mot de passe oublié ?
+                      </Link>
+                    </p>
+                  </div>
                   {userExist ? (
                     <div className="failed_full">
                       Ce nom d'uilisateur n'a pas été retrouvé

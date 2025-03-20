@@ -11,7 +11,7 @@ export const FuncAuth = () => {
     console.log('travian');
 
 
-    // Axios.get("https://backend-shop.benindigital.com/isUserAuth", {
+    // Axios.get("https://backendtrader.digitalfirst.space/isUserAuth", {
     //     headers: {
     //         "x-access-token": JSON.parse(localStorage.getItem("user") + "").token,
     //     },

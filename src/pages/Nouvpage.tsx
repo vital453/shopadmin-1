@@ -97,7 +97,7 @@ const Nouv: React.FC = () => {
         
     }
     const lot = () => {
-        fetch(`https://backend-shop.benindigital.com/uploads/1657271084.jpg`)
+        fetch(`https://backendtrader.digitalfirst.space/uploads/1657271084.jpg`)
             .then(function (response) {
                 return response.blob();
             })

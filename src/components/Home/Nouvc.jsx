@@ -68,7 +68,7 @@ const Nouvc = () => {
 
   const modif1 = () => {
     try {
-      Axios.post("https://backend-shop.benindigital.com/majprofile1", {
+      Axios.post("https://backendtrader.digitalfirst.space/majprofile1", {
         id: JSON.parse(localStorage.getItem("user") + "").userId,
         boutique: JSON.parse(localStorage.getItem("store_name")),
       }).then((ret) => {
@@ -78,7 +78,7 @@ const Nouvc = () => {
   };
   const modif2 = () => {
     try {
-      Axios.post("https://backend-shop.benindigital.com/majprofile2", {
+      Axios.post("https://backendtrader.digitalfirst.space/majprofile2", {
         id: JSON.parse(localStorage.getItem("user") + "").userId,
         adress: JSON.parse(localStorage.getItem("adress")),
       }).then((ret) => {
@@ -88,7 +88,7 @@ const Nouvc = () => {
   };
   const modif3 = () => {
     try {
-      Axios.post("https://backend-shop.benindigital.com/majprofile3", {
+      Axios.post("https://backendtrader.digitalfirst.space/majprofile3", {
         id: JSON.parse(localStorage.getItem("user") + "").userId,
         description: JSON.parse(localStorage.getItem("description")),
       }).then((ret) => {
@@ -98,7 +98,7 @@ const Nouvc = () => {
   };
   const modif4 = () => {
     try {
-      Axios.post("https://backend-shop.benindigital.com/majprofile4", {
+      Axios.post("https://backendtrader.digitalfirst.space/majprofile4", {
         id: JSON.parse(localStorage.getItem("user") + "").userId,
         website: JSON.parse(localStorage.getItem("website")),
       }).then((ret) => {
@@ -108,7 +108,7 @@ const Nouvc = () => {
   };
   const modif5 = () => {
     try {
-      Axios.post("https://backend-shop.benindigital.com/majprofile5", {
+      Axios.post("https://backendtrader.digitalfirst.space/majprofile5", {
         id: JSON.parse(localStorage.getItem("user") + "").userId,
         facebook: JSON.parse(localStorage.getItem("facebook")),
       }).then((ret) => {
@@ -118,7 +118,7 @@ const Nouvc = () => {
   };
   const modif6 = () => {
     try {
-      Axios.post("https://backend-shop.benindigital.com/majprofile6", {
+      Axios.post("https://backendtrader.digitalfirst.space/majprofile6", {
         id: JSON.parse(localStorage.getItem("user") + "").userId,
         whatsapp: JSON.parse(localStorage.getItem("whatsapp")),
       }).then((ret) => {

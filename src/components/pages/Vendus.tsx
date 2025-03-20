@@ -58,7 +58,7 @@ export const Vendus: React.SFC<Ajout_utiliformprops> = ({ }) => {
     const [id, setId] = useState<number>(0);
 
     const getcom = () => {
-        fetch('https://backend-shop.benindigital.com/affichecomv').then((res) => {
+        fetch('https://backendtrader.digitalfirst.space/affichecomv').then((res) => {
             const data = res.json()
             return data
         })

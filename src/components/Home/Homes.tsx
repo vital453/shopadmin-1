@@ -1,3 +1,5 @@
+/* eslint-disable eqeqeq */
+/* eslint-disable react/style-prop-object */
 /* eslint-disable no-lone-blocks */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable jsx-a11y/role-supports-aria-props */
@@ -45,6 +47,8 @@ import {
   IonRefresher,
   IonRefresherContent,
   RefresherEventDetail,
+  IonAccordionGroup,
+  IonAccordion,
 } from "@ionic/react";
 import About from "./About";
 import "./homes.css";
@@ -70,10 +74,9 @@ import {
   personSharp,
 } from "ionicons/icons";
 import { Route, Redirect } from "react-router";
-import CoffeeCard from "../CoffeeCard";
 import { Conteneur1 } from "../Conteneur1";
 import { Conteneur } from "../conteneur";
-import Nouv2 from "../../pages/Nouv2.js";
+import Nouv2 from "../../pages/Nouvphy.js";
 import { Ventes } from "../../components/pages/Ventes";
 import Article from "../pages/Article";
 import Homecom from "../../pages/Homecom";
@@ -110,7 +113,13 @@ import {
   FaShopify,
 } from "react-icons/fa";
 import { AiOutlineBank, AiOutlineImport } from "react-icons/ai";
-import { BsBoxArrowInLeft, BsFillHouseFill, BsShop } from "react-icons/bs";
+import {
+  BsBoxArrowInLeft,
+  BsCameraFill,
+  BsDashCircle,
+  BsFillHouseFill,
+  BsShop,
+} from "react-icons/bs";
 import Axios from "axios";
 import { setBadge, setBoutiquecompte, setdate } from "../../Feature/HashSlice";
 import {
@@ -122,6 +131,18 @@ import { recupApprovision } from "../../Feature/ApprovisionSlice";
 import { recupCateg, recupProduct } from "../../Feature/ProductSlice";
 import { recupCommande, recupCommandeart } from "../../Feature/CommandeSlice";
 import { recupApprovisionnement } from "../../Feature/ApprovisionnementSlice";
+import { FiRefreshCw } from "react-icons/fi";
+import "intro.js/introjs.css";
+import introJs from "intro.js";
+import { GoogleLogin, googleLogout } from "@react-oauth/google";
+import jwt_decode from "jwt-decode";
+
+import {
+  openKkiapayWidget,
+  addKkiapayListener,
+  removeKkiapayListener,
+} from "kkiapay";
+
 // import { setUsercompte } from "../../Feature/HashSlice";
 
 // import { Swiper } from 'swiper/types';
@@ -132,7 +153,8 @@ import { recupApprovisionnement } from "../../Feature/ApprovisionnementSlice";
 // import 'swiper/swiper.scss';
 // import 'swiper/scss'
 
-export const Homes: React.SFC<{}> = () => {
+// export const Homes: React.FC<{}> = () => {
+export const Homes: React.FC<{}> = () => {
   const [showmodal, setShowmodal] = useState<any>(false);
   const [showmodal2, setShowmodal2] = useState<any>(false);
   const [showmodal3, setShowmodal3] = useState<any>(false);
@@ -155,6 +177,7 @@ export const Homes: React.SFC<{}> = () => {
   const [adresse, setAdresse] = useState<String>("rr");
   const [antecedant, setantecedant] = useState<String>("rr");
   const [datenaissance, setdatenaissance] = useState<String>("rr");
+  const [credential, setcredential] = useState<String>("rr");
   const [dern1, setDern1] = useState<any>(0);
   const [dern2, setDern2] = useState<any>(0);
   const [dern3, setDern3] = useState<any>(0);
@@ -166,6 +189,17 @@ export const Homes: React.SFC<{}> = () => {
   const boutiquecompte = useSelector((state: any) => state.Hash.boutiquecompte);
   const badge = useSelector((state: any) => state.Hash.badge);
   const userid = useSelector((state: any) => state.auth.user);
+  const [user, setUser] = useState(false);
+  const [progress, setprogress] = useState(false);
+  const [invoice, setInvoice] = useState<any>("ee");
+  const [statut, setStatut] = useState<any>();
+  const [date, setDate] = useState<any>();
+  const [prixt, setPrixt] = useState<any>("rr");
+  const [whatsapp, setWhatsapp] = useState<any>();
+  const [etatstat, setEtatstat] = useState<any>(false);
+
+  // const [currentStep, setCurrentStep] = useState(2);
+  // const totalSteps = 2;
 
   // const [badge, setbadge] = useState<any>(0);
   let username =
@@ -175,12 +209,13 @@ export const Homes: React.SFC<{}> = () => {
 
   let numberwhat =
     JSON.parse(localStorage.getItem("whatsapp") + "") === ""
-      ? "229 xxxxxxxx"
-      : JSON.parse(localStorage.getItem("whatsapp") + "");
+      ? ""
+      : // ? "229 xxxxxxxxx"
+        JSON.parse(localStorage.getItem("whatsapp") + "");
   const dispatch = useDispatch();
 
   const getpatient = () => {
-    fetch("https://backend-shop.benindigital.com/afficheart")
+    fetch("https://backendtrader.digitalfirst.space/afficheart")
       .then((res) => {
         const data = res.json();
         return data;
@@ -192,7 +227,7 @@ export const Homes: React.SFC<{}> = () => {
   };
 
   const getcat = () => {
-    fetch("https://backend-shop.benindigital.com/affichecategory")
+    fetch("https://backendtrader.digitalfirst.space/affichecategory")
       .then((res) => {
         const data = res.json();
         return data;
@@ -206,7 +241,7 @@ export const Homes: React.SFC<{}> = () => {
   //   const addcomptee= ()=>{
   // console.log(usercompte);
   // for (let i = 0; i < usercompte.length; i++) {
-  //   Axios.post("https://backend-shop.benindigital.com/addcompte", {
+  //   Axios.post("https://backendtrader.digitalfirst.space/addcompte", {
   //     username: usercompte[i].username,
   //     password: usercompte[i].password,
   //     email: usercompte[i].email,
@@ -298,7 +333,7 @@ export const Homes: React.SFC<{}> = () => {
   const email = "mevivital@gmail.com";
   const envoiemail = () => {
     Axios.get(
-      "https://backend-shop.benindigital.com/sendmail/sendMail.php?email=" +
+      "https://backendtrader.digitalfirst.space/sendmail/sendMail.php?email=" +
         email +
         "&body=" +
         body +
@@ -324,7 +359,7 @@ export const Homes: React.SFC<{}> = () => {
 
   const profile_full = () => {
     try {
-      Axios.post("https://backend-shop.benindigital.com/profile_full", {
+      Axios.post("https://backendtrader.digitalfirst.space/profile_full", {
         id: JSON.parse(localStorage.getItem("user") + "").BoutiqueId,
       }).then((ret) => {
         console.log(ret.data);
@@ -338,6 +373,7 @@ export const Homes: React.SFC<{}> = () => {
           JSON.stringify(ret.data[0].description)
         );
         localStorage.setItem("adress", JSON.stringify(ret.data[0].adress));
+        localStorage.setItem("email", JSON.stringify(ret.data[0].email));
         localStorage.setItem("website", JSON.stringify(ret.data[0].website));
         localStorage.setItem("facebook", JSON.stringify(ret.data[0].facebook));
         localStorage.setItem("whatsapp", JSON.stringify(ret.data[0].whatsapp));
@@ -350,7 +386,7 @@ export const Homes: React.SFC<{}> = () => {
   };
 
   const getCaisse = () => {
-    Axios.post("https://backend-shop.benindigital.com/caisse_val", {
+    Axios.post("https://backendtrader.digitalfirst.space/caisse_val", {
       id_boutique: JSON.parse(localStorage.getItem("user") + "").BoutiqueId,
     }).then((ret) => {
       console.log(ret.data);
@@ -358,7 +394,7 @@ export const Homes: React.SFC<{}> = () => {
     });
   };
   const gethisto_depense = () => {
-    Axios.post("https://backend-shop.benindigital.com/histo_depense", {
+    Axios.post("https://backendtrader.digitalfirst.space/histo_depense", {
       id_boutique: JSON.parse(localStorage.getItem("user") + "").BoutiqueId,
     }).then((ret) => {
       console.log(ret.data);
@@ -366,9 +402,12 @@ export const Homes: React.SFC<{}> = () => {
     });
   };
   const gethisto_decaissement = () => {
-    Axios.post("https://backend-shop.benindigital.com/histo_decaissement", {
-      id_boutique: JSON.parse(localStorage.getItem("user") + "").BoutiqueId,
-    }).then((ret) => {
+    Axios.post(
+      "https://backendtrader.digitalfirst.space/histo_decaissement",
+      {
+        id_boutique: JSON.parse(localStorage.getItem("user") + "").BoutiqueId,
+      }
+    ).then((ret) => {
       console.log(ret.data);
       dispatch(sethisto_decaisse(ret.data));
     });
@@ -380,18 +419,21 @@ export const Homes: React.SFC<{}> = () => {
     dispatch(
       recupApprovision(JSON.parse(localStorage.getItem("approvision") + ""))
     );
-    Axios.post("https://backend-shop.benindigital.com/afficheart", {
+    Axios.post("https://backendtrader.digitalfirst.space/afficheart", {
       id_boutique: JSON.parse(localStorage.getItem("user") + "").BoutiqueId,
     }).then((ret) => {
       dispatch(recupProduct(ret.data));
       console.log(ret.data);
-      Axios.post("https://backend-shop.benindigital.com/affichecategory", {
-        id_boutique: JSON.parse(localStorage.getItem("user") + "").BoutiqueId,
-      }).then((ret) => {
+      Axios.post(
+        "https://backendtrader.digitalfirst.space/affichecategory",
+        {
+          id_boutique: JSON.parse(localStorage.getItem("user") + "").BoutiqueId,
+        }
+      ).then((ret) => {
         dispatch(recupCateg(ret.data));
         console.log(ret.data);
         Axios.post(
-          "https://backend-shop.benindigital.com/afficheboutiqueparcompte",
+          "https://backendtrader.digitalfirst.space/afficheboutiqueparcompte",
           {
             idcompte: JSON.parse(localStorage.getItem("user") + "").userId,
           }
@@ -399,14 +441,17 @@ export const Homes: React.SFC<{}> = () => {
           dispatch(setBoutiquecompte(ret.data));
           dispatch(setBadge(parseInt(localStorage.getItem("badge") + "")));
           console.log(ret.data);
-          Axios.post("https://backend-shop.benindigital.com/affichecommande", {
-            id_boutique: JSON.parse(localStorage.getItem("user") + "")
-              .BoutiqueId,
-          }).then((ret) => {
+          Axios.post(
+            "https://backendtrader.digitalfirst.space/affichecommande",
+            {
+              id_boutique: JSON.parse(localStorage.getItem("user") + "")
+                .BoutiqueId,
+            }
+          ).then((ret) => {
             dispatch(recupCommande(ret.data));
             console.log(ret.data);
             Axios.post(
-              "https://backend-shop.benindigital.com/affichecommandeart",
+              "https://backendtrader.digitalfirst.space/affichecommandeart",
               {
                 id_boutique: JSON.parse(localStorage.getItem("user") + "")
                   .BoutiqueId,
@@ -415,7 +460,7 @@ export const Homes: React.SFC<{}> = () => {
               dispatch(recupCommandeart(ret.data));
               console.log(ret.data);
               Axios.post(
-                "https://backend-shop.benindigital.com/afficheartapprov",
+                "https://backendtrader.digitalfirst.space/afficheartapprov",
                 {
                   id_boutique: JSON.parse(localStorage.getItem("user") + "")
                     .BoutiqueId,
@@ -431,6 +476,119 @@ export const Homes: React.SFC<{}> = () => {
     });
   };
 
+  const sendapk = async (event: any) => {
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append("fileToUpload", file);
+
+    Axios.post(
+      "https://backendtrader.digitalfirst.space/upload_numerique.php",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    )
+      .then((response) => {
+        console.log(response);
+        // console.log("Fichier téléversé avec succès.");
+      })
+      .catch((error) => {
+        console.error("Erreur lors du téléversement du fichier.", error);
+      });
+  };
+  const testdate = (nbJours: any) => {
+    // const dateActuelle = new Date();
+    // // Ajouter le nombre de jours saisi par l'utilisateur
+    // dateActuelle.setDate(dateActuelle.getDate() + parseInt(nbJours));
+    // // Afficher la date dans x jours
+    // console.log(`Dans ${nbJours} jours, nous serons le ${dateActuelle.toLocaleDateString('fr-FR')}`);
+    // Récupérer la date actuelle
+
+    fetch("https://backendtrader.digitalfirst.space/date_time")
+      .then((res) => {
+        const data = res.json();
+        return data;
+      })
+      .then((data) => {
+        const tempsEnMillisecondes = Date.parse(data[0].time_actu);
+
+        // Créer un objet Date à partir des millisecondes
+        const dateActuelle = new Date(tempsEnMillisecondes);
+        // Ajouter le nombre de jours saisi par l'utilisateur
+        dateActuelle.setDate(dateActuelle.getDate() + parseInt(nbJours));
+        // Récupérer les composantes de la date
+        const annee = dateActuelle.getFullYear().toString();
+        // const annee = dateActuelle.getFullYear().toString().substring(2);
+        const mois = (dateActuelle.getMonth() + 1).toString().padStart(2, "0");
+        const jour = dateActuelle.getDate().toString().padStart(2, "0");
+        // Afficher la date dans x jours
+        console.log(
+          `Dans ${nbJours} jours, nous serons le ${annee}-${mois}-${jour}`
+        );
+      });
+  };
+
+  const enregistr = () => {
+    setprogress(true);
+    Axios.post("https://backendtrader.digitalfirst.space/save_in_drive", {
+      REFRESH_TOKEN: credential,
+    }).then((ret) => {
+      setprogress(false);
+      console.log(ret.data + "reponse enregistrement ");
+      // dispatch(sethisto_decaisse(ret.data));
+    });
+  };
+
+  const googleUserInfos = (e: any) => {
+    console.log(e);
+    console.log(e.credential + "credentials");
+    setcredential(String(e.credential));
+
+    console.log(e.credential.email); // email
+    console.log(e.credential.name); // nom
+    console.log(e.credential.picture); // image
+    console.log(e.credential.sub); // id
+
+    // const decoded : {
+    //   name: string,
+    //   picture: String,
+    //   sub: String,
+
+    // } = jwt_decode(e.credential);
+  };
+
+  const permu = (
+    n: String | React.SetStateAction<String>,
+    p: String | React.SetStateAction<String>,
+    a: String | React.SetStateAction<String>,
+    s: String | React.SetStateAction<String>,
+    z: String | React.SetStateAction<String>
+  ) => {
+    setInvoice(p);
+    setDate(n);
+    setStatut(a);
+    setPrixt(s);
+    setWhatsapp(z);
+    setShowmodal4(true);
+  };
+
+  const open = () => {
+    openKkiapayWidget({
+      amount: 1,
+      api_key: "f360c365307f9afa1c1cded51173173beef6f22b",
+      // sandbox: true,
+      email: "mevivital@gmail.com",
+      phone: "61940010",
+      name: "viyt",
+    });
+  };
+
+  function successHandler(response: any) {
+    console.log(response);
+  }
+
   useEffect(() => {
     // getpatient();
     getcat();
@@ -439,6 +597,56 @@ export const Homes: React.SFC<{}> = () => {
 
     // getcommand();
   }, []);
+
+  useEffect(() => {
+    addKkiapayListener("success", successHandler);
+    return () => {
+      removeKkiapayListener("success");
+    };
+  }, []);
+
+  // useEffect(() => {
+  //   google.accounts.id.initialize({
+  //     client_id : ""
+  //   })
+  // }, []);
+
+  // useEffect(() => {
+  //   setCurrentStep(currentStep);
+  // }, [currentStep]);
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     // const showTutorial = localStorage.getItem('showTutorial');
+  //     const step1Element = document.querySelector("#step1");
+  //     const step2Element = document.querySelector("#step2");
+  //     // if (showTutorial === null || showTutorial === 'true') {
+  //     if (step1Element && step2Element) {
+  //       introJs()
+  //         .setOptions({
+  //           steps: [
+  //             {
+  //               element: step1Element,
+  //               intro: "Ceci est la première étape du tutoriel.",
+  //               // tooltipClass: 'custom-class',
+  //             },
+  //             {
+  //               element: step2Element,
+  //               intro: "Ceci est la deuxième étape du tutoriel.",
+  //               // tooltipClass: 'custom-class',
+  //             },
+  //           ],
+  //           nextLabel: "Suivant",
+  //           prevLabel: "Retour",
+  //           doneLabel: "Terminer",
+  //         })
+  //         .start();
+  //       // localStorage.setItem('showTutorial', 'false');
+  //     }
+  //     // }
+  //   }, 200);
+  // }, []);
+
   // useEffect(() => {
   //   profile_full();
   //   getCaisse();
@@ -449,42 +657,127 @@ export const Homes: React.SFC<{}> = () => {
   return (
     <>
       <IonMenu contentId="main-content">
-        <IonMenuToggle>
-          <div className="w-full h-48 bg-alice_blue-color2 flex flex-col">
-            <div className="flex mt-6 justify-between items-center">
-              {boutiquecompte
-                .filter((t: any) => t.id === badge)&& boutiquecompte
-                .filter((t: any) => t.id === badge)
+        <div className="w-full  flex flex-col">
+          <div className="flex mt-0 justify-between items-center bg-alice_blue-color2">
+            {boutiquecompte.filter((t: any) => t.id == badge) &&
+              boutiquecompte
+                .filter((t: any) => t.id == badge)
                 .map((bat: any) => {
-                  return (
-                    bat.image === "" ?  <img
-                    src="store.png"
-                    alt=""
-                    className="w-24 h-24 rounded-full object-cover"
-                  /> :  <img
-                    src={ boutiquecompte
-                      .filter((t: any) => t.id === badge) && `https://backend-shop.benindigital.com/uploads/${bat.image}`}
-                    alt=""
-                    className="w-24 h-24 rounded-full object-fill"
-                  />
-                   
+                  return bat.image === "" ? (
+                    <img
+                      src="store.png"
+                      alt=""
+                      className="w-24 h-24 rounded-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={
+                        boutiquecompte.filter((t: any) => t.id == badge) &&
+                        `https://backendtrader.digitalfirst.space/uploads/${bat.image}`
+                      }
+                      alt=""
+                      className="w-24 h-24 rounded-full object-fill"
+                    />
                   );
                 })}
-              <div className="flex flex-col items-center justify-center m-3">
-                <div className="w-10 h-10 items-center justify-center mb-3">
-                  <img src="brightness.png" alt="" className="object-cover" />
-                </div>{" "}
-                <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center">
-                  <img
-                    src="save-instagram.png"
-                    alt=""
-                    className="w-5 h-5 items-center justify-center object-cover"
-                  />
-                </div>
-              </div>
+            <div className="flex flex-col items-center justify-center m-3">
+              <div className="w-10 h-10 items-center justify-center mb-3">
+                <img src="brightness.png" alt="" className="object-cover" />
+              </div>{" "}
+              {/* <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center">
+                <img
+                  src="save-instagram.png"
+                  alt=""
+                  className="w-5 h-5 items-center justify-center object-cover"
+                />
+              </div> */}
             </div>
+          </div>
+
+          <div className="slidenav">
             <div>
-              <div className="accordion" id="accordionExample">
+              {/* accordeon ionic */}
+              <div className="">
+                <IonAccordionGroup>
+                  <IonAccordion value="first">
+                    <IonItem slot="header">
+                      <IonLabel>
+                        <h3 className="mb-2">{username}</h3>
+                        <p>{numberwhat}</p>
+                      </IonLabel>
+                    </IonItem>
+                    {/* <IonItem slot="header" >
+                  </IonItem> */}
+                    <div className="ion-padding" slot="content">
+                      <div className="flex flex-col">
+                        {boutiquecompte.map((bout: any, index: any) => {
+                          return (
+                            <>
+                              <IonMenuToggle>
+                                <div
+                                  className="flex w-full items-center justify-start mb-3"
+                                  onClick={() => {
+                                    dispatch(setBadge(bout.id));
+                                    // console.log(bout.id);
+                                    selectboutique(bout.id);
+                                  }}
+                                >
+                                  <div className="w-10 h-10">
+                                    {bout.image === "" ? (
+                                      <img
+                                        src="store.png"
+                                        alt=""
+                                        className="w-10 h-10 object-cover rounded-full"
+                                      />
+                                    ) : (
+                                      <img
+                                        src={`https://backendtrader.digitalfirst.space/uploads/${bout.image}`}
+                                        alt=""
+                                        className="w-10 h-10 object-cover rounded-full"
+                                      />
+                                    )}
+
+                                    {badge == bout.id ? (
+                                      <img
+                                        src="correct.png"
+                                        alt=""
+                                        className="w-4 h-4 object-cover badgecor"
+                                      />
+                                    ) : null}
+                                  </div>
+                                  <h2 className="text-lg text-gray-900">
+                                    {bout.store_name === ""
+                                      ? bout.boutiqueName
+                                      : bout.store_name}
+                                  </h2>
+                                </div>
+                              </IonMenuToggle>
+                            </>
+                          );
+                        })}
+                        <IonMenuToggle>
+                          <IonRouterLink
+                            routerLink="/addboutique"
+                            className="text-black"
+                          >
+                            <div className="justify-start items-center flex mt-2 ml-1">
+                              <img
+                                src="add.png"
+                                alt=""
+                                className="w-7 h-7 object-cover"
+                              />
+                              <h3 className="text-lg mt-2">
+                                Ajouter une boutique{" "}
+                              </h3>
+                            </div>
+                          </IonRouterLink>
+                        </IonMenuToggle>
+                      </div>
+                    </div>
+                  </IonAccordion>
+                </IonAccordionGroup>
+              </div>
+              {/* <div className="accordion" id="accordionExample">
                 <div className="accordion-item">
                   <div className="flex justify-between items-center">
                     <div
@@ -547,88 +840,122 @@ export const Homes: React.SFC<{}> = () => {
                     data-bs-parent="#accordionExample"
                   >
                     <div className="accordion-body">
-                      <div className="flex flex-col">
-                        {boutiquecompte.map((bout: any, index: any) => {
-                          return (
-                            <>
-                              <div
-                                className="flex w-full items-center justify-start mb-3"
-                                onClick={() => {
-                                  dispatch(setBadge(bout.id));
-                                  // console.log(bout.id);
-                                  selectboutique(bout.id);
-                                }}
-                              >
-                                <div className="w-10 h-10">
-                                  {bout.image === "" ?  <img
-                                    src="store.png"
-                                    alt=""
-                                    className="w-10 h-10 object-cover rounded-full"
-                                  /> :  <img
-                                  src={`https://backend-shop.benindigital.com/uploads/${bout.image}`}
-                                  alt=""
-                                  className="w-10 h-10 object-cover rounded-full"
-                                />}
-                                 
-                                  {badge === bout.id ? (
-                                    <img
-                                      src="correct.png"
-                                      alt=""
-                                      className="w-4 h-4 object-cover badgecor"
-                                    />
-                                  ) : null}
-                                </div>
-                                <h2 className="text-lg text-gray-900">
-                                  {bout.store_name === "" ? bout.boutiqueName : bout.store_name}
-                                </h2>
-                              </div>
-                            </>
-                          );
-                        })}
-                        <IonRouterLink
-                          routerLink="/addboutique"
-                          className="text-black"
-                        >
-                          <div className="justify-start items-center flex mt-2 ml-1">
-                            <img
-                              src="add.png"
-                              alt=""
-                              className="w-7 h-7 object-cover"
-                            />
-                            <h3 className="text-lg mt-2">
-                              Ajouter une boutique{" "}
-                            </h3>
-                          </div>
-                        </IonRouterLink>
-                      </div>
+                      
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
-            <IonRouterLink routerLink="/droit_dacces" className="text-black">
-              <div className="justify-start items-center flex mt-7 ml-3">
-                <img src="authorization.png" alt="" className="w-7 h-7 object-cover" />
-                <h3 className="text-lg">Droit d'accès </h3>
+            {/* <IonMenuToggle>
+              <IonRouterLink
+                routerLink="/create_droit_dacces"
+                className="text-black"
+              >
+                <div className="justify-start items-center flex mt-7 ml-3">
+                  <img
+                    src="authorization.png"
+                    alt=""
+                    className="w-7 h-7 object-cover"
+                  />
+                  <h3 className="text-lg mt-2">Droit d'accès </h3>
+                </div>
+              </IonRouterLink>
+            </IonMenuToggle> */}
+            <IonMenuToggle>
+              <IonRouterLink routerLink="/voir_profile" className="text-black">
+                <div className="justify-start items-center flex mt-7 ml-3">
+                  <img
+                    src="resume.png"
+                    alt=""
+                    className="w-7 h-7 object-cover"
+                  />
+                  <h3 className="text-lg mt-2">Ma Boutique </h3>
+                </div>
+              </IonRouterLink>
+            </IonMenuToggle>
+            <IonMenuToggle>
+              <IonRouterLink
+                routerLink="/demande_fonctionnalite"
+                // onClick={()=>{window.location.href = "/demande_fonctionnalite"}}
+                className="text-black"
+              >
+                <div className="justify-start items-center flex mt-7 ml-3">
+                  <img
+                    src="refresh.png"
+                    alt=""
+                    className="w-7 h-7 object-cover"
+                  />
+                  <h3 className="text-lg mt-2">Demander une fonctionnalité </h3>
+                </div>
+              </IonRouterLink>
+            </IonMenuToggle>
+            <IonMenuToggle>
+              <IonRouterLink
+                routerLink="/partager"
+                // onClick={()=>{window.location.href = "/demande_fonctionnalite"}}
+                className="text-black"
+              >
+                <div className="justify-start items-center flex mt-7 ml-3 text-black">
+                  <img
+                    src="network.png"
+                    alt=""
+                    className="w-7 h-7 object-cover"
+                  />
+                  <h3 className="text-lg mt-2">Partager</h3>
+                </div>
+              </IonRouterLink>
+            </IonMenuToggle>
+            <IonMenuToggle>
+              <div
+                className="justify-start items-center flex mt-7 ml-3 text-black"
+                onClick={() => {
+                  const numUser = "22969889350";
+                  const whats = `https://wa.me/${numUser}`;
+                  {
+                    window.location.href = whats;
+                  }
+                }}
+              >
+                <img
+                  src="whatsapps.png"
+                  alt=""
+                  className="w-7 h-7 object-cover"
+                />
+                <h3 className="text-lg mt-2">Nous contactez</h3>
               </div>
-            </IonRouterLink>
-            <IonRouterLink routerLink="/voir_profile" className="text-black">
-              <div className="justify-start items-center flex mt-7 ml-3">
-                <img src="resume.png" alt="" className="w-7 h-7 object-cover" />
-                <h3 className="text-lg">Ma Boutique </h3>
+            </IonMenuToggle>
+            <IonMenuToggle>
+              <div
+                className="justify-start items-center flex mt-7 ml-3 text-black"
+                onClick={() => {
+                  const download = `https://versatileskills.space/download/Digital_Traders.apk`;
+                  window.location.href = download;
+                }}
+              >
+                <img
+                  src="cloud-computing.png"
+                  alt=""
+                  className="w-7 h-7 object-cover"
+                />
+                <h3 className="text-lg mt-2"> Version client</h3>
               </div>
-            </IonRouterLink>
-            <div
-              className="justify-start items-center flex mt-7 ml-3"
-              onClick={() => {
-                dispatch(logOutt([]));
-              }}
-            >
-              <img src="plug.png" alt="" className="w-7 h- 7object-cover" />
-              <h3 className="text-lg">Se deconnecter</h3>
-            </div>
+            </IonMenuToggle>
+            <IonMenuToggle>
+              <div
+                className="justify-start items-center flex mt-7 ml-3"
+                onClick={() => {
+                  setTimeout(() => {
+                    localStorage.setItem("authentificator", "false");
+                  }, 1000);
+                  dispatch(logOutt([]));
+                }}
+              >
+                <img src="plug.png" alt="" className="w-7 h- 7object-cover" />
+                <h3 className="text-lg mt-2">Se deconnecter</h3>
+              </div>
+            </IonMenuToggle>
           </div>
-        </IonMenuToggle>
+        </div>
         {/* <IonHeader>
           <IonToolbar>
             <IonTitle>{username}</IonTitle>
@@ -701,16 +1028,49 @@ export const Homes: React.SFC<{}> = () => {
       <IonPage id="main-content">
         <IonHeader>
           <IonToolbar>
-            <IonButtons slot="start">
-              {/* <IonButton onClick={() => {}}>
-                <IonIcon color="medium" icon={menuOutline} />
-              </IonButton> */}
+            <div className="flex justify-between items-center">
+              <IonMenuButton color="dark"></IonMenuButton>
+
+              <IonTitle className="nereide">Digital trader</IonTitle>
+
+              <IonButtons
+                slot="end"
+                className="mr-5 text-xl cursor-pointer"
+                onClick={() => {
+                  window.location.href = "/home";
+                }}
+              >
+                <FiRefreshCw />
+              </IonButtons>
+            </div>
+            {/* <IonButtons slot="start">
+          
               <IonMenuButton color="dark"></IonMenuButton>
             </IonButtons>
-            <IonTitle className="nereide">Digital trader</IonTitle>
+            <IonTitle className="nereide">Digital trader</IonTitle> */}
           </IonToolbar>
         </IonHeader>
         <IonContent fullscreen className="alice">
+          <IonModal
+            isOpen={showmodal4}
+            onDidDismiss={() => {
+              setShowmodal4(false);
+            }}
+          >
+            <ModalCom
+              onclose={() => {
+                setShowmodal4(false);
+                // getcom();
+              }}
+              Invoice={invoice}
+              Prix={prixt}
+              Datec={date}
+              Statut={statut}
+              Etat={etatstat}
+              Whatsapp={whatsapp}
+              // tab={patient}
+            />
+          </IonModal>
           <IonHeader collapse="condense">
             <IonToolbar>
               <IonTitle size="large" className="page-title">
@@ -721,57 +1081,160 @@ export const Homes: React.SFC<{}> = () => {
           </IonHeader>
           <IonList className="alice">
             <div className="homes">
-              <IonRouterLink routerLink={`/Historique/${1}`} color="dark">
-                <IonGrid
-                  className="grid1"
-                  onClick={() => {
-                    // { window.location.href = ` /home/Ventes ` };
-                  }}
-                >
-                  <div className="Titre22">
-                    <IonCol className="silk" size="7">
-                      Vos commandes en attente{" "}
-                    </IonCol>
-                    <p className="para">Tout voir</p>
+              <IonGrid
+                className="grid1"
+                onClick={() => {
+                  // { window.location.href = ` /home/Ventes ` };
+                }}
+                id="step1"
+              >
+                <div className="Titre22">
+                  <IonCol className="silk" size="7">
+                    Vos commandes en attente{" "}
+                  </IonCol>
+                  {/* <IonRouterLink routerLink={} color="dark"> */}
+                  <p
+                    className="cursor-pointer para"
+                    onClick={() => {
+                      window.location.href = `/Historique/${1}`;
+                    }}
+                  >
+                    Tout voir
+                  </p>
+                  {/* </IonRouterLink> */}
+                </div>
+                {command1.filter((e: any) => e.status_id_command < 3).length ==
+                0 ? (
+                  <div className="items-center justify-center text-center">
+                    <img className="" src="delai-de-traitement.png" alt="d" />
+                    <h2 className="items-center justify-center text-center">
+                      aucune commande en attente
+                    </h2>
                   </div>
-                  {command1.filter((e: any) => e.status_id_command < 3)
-                    .length == 0 ? (
-                    <div className="items-center justify-center text-center">
-                      <img className="" src="delai-de-traitement.png" alt="d" />
-                      <h2 className="items-center justify-center text-center">
-                        aucune commande en attente
-                      </h2>
-                    </div>
-                  ) : (
-                    <>
-                      {command1
-                        .filter((e: any) => e.status_id_command < 3)
-                        .map((card: any, index: any) => {
-                          return index <
-                            command1.filter((e: any) => e.status_id_command < 3)
-                              .length -
-                              4 ? null : (
-                            <IonItem className="itemlv nereide" lines="full">
-                              <IonCol className="add1">{card.whatsapp}</IonCol>
-                              <IonCol>{card.date.split("T")[0]}</IonCol>
-                              <IonCol>
-                                {new Intl.NumberFormat("de-DE", {
-                                  style: "currency",
-                                  currency: "XOF",
-                                }).format(card.total_price)}
-                              </IonCol>
-                            </IonItem>
-                          );
-                        })}
-                    </>
-                  )}
-                </IonGrid>
-              </IonRouterLink>
-              {/* <IonRouterLink routerLink="/Nouvc">
+                ) : (
+                  <>
+                    {command1
+                      .filter((e: any) => e.status_id_command < 3)
+                      .map((card: any, index: any) => {
+                        return index >= 5 ? null : (
+                          // index <
+                          //   command1.filter((e: any) => e.status_id_command < 3)
+                          //     .length -
+                          //     4 ? null :
+                          <IonItem
+                            className="cursor-pointer itemlv nereide"
+                            lines="full"
+                            onClick={() => {
+                              permu(
+                                card.date,
+                                card.invoice,
+                                card.status_id_command,
+                                card.total_price,
+                                card.whatsapp
+                              );
+                            }}
+                          >
+                            <IonCol className="add1">{card.whatsapp}</IonCol>
+                            <IonCol>{card.date.split("T")[0]}</IonCol>
+                            <IonCol>
+                              {new Intl.NumberFormat("de-DE", {
+                                style: "currency",
+                                currency: "XOF",
+                              }).format(card.total_price)}
+                            </IonCol>
+                          </IonItem>
+                        );
+                      })}
+                  </>
+                )}
+              </IonGrid>
+
+              {/* <IonRouterLink routerLink="/Testsendimage">
                 <IonButton>ccc</IonButton>
               </IonRouterLink> */}
-              {/* <div onClick={() => {addcomptee()}} className="cursor-pointer">cccccc</div> */}
-              <IonGrid className="grid1">
+              {/* <div
+                onClick={() => testdate(500)}
+                className="cursor-pointer bg-green-400 p-3 rounded-md mt-3"
+              >
+                Test img
+              </div>
+
+              <div className="cursor-pointer bg-green-400 p-3 rounded-md mt-3">
+                <label htmlFor="fileToUpload" className="flex gap-3">
+                  <BsDashCircle className="text-xl text-white" /> send apk or
+                  exe or zip
+                  <input
+                    type="file"
+                    style={{ display: "none" }}
+                    id="fileToUpload"
+                    name="fileToUpload"
+                    onChange={sendapk}
+                  />
+                </label>
+              </div> */}
+
+              {/* {user ? (
+                <div>Connecté</div>
+              ) : (
+                <div className="mt-4">
+                  <GoogleLogin
+                    onSuccess={(response) => {
+                      googleUserInfos(response);
+                      setUser(true);
+                    }}
+                    onError={() => console.log("Erreur")}
+                  />
+                </div>
+              )}
+
+              {user ? (
+                <div className="flex items-center justify-center gap-2">
+                  <IonButton
+                    onClick={() => {
+                      googleLogout();
+                      setUser(false);
+                    }}
+                  >
+                    Se Déconnecter
+                  </IonButton>
+                  {progress ? (
+                    <div className="three-body">
+                      <div className="three-body__dot"></div>
+                      <div className="three-body__dot"></div>
+                      <div className="three-body__dot"></div>
+                    </div>
+                  ) : (
+                    <IonButton
+                      onClick={() => {
+                        enregistr();
+                      }}
+                    >
+                      enregistrer
+                    </IonButton>
+                  )}
+                </div>
+              ) : // <div>''''</div>
+              null} */}
+
+              {/* <div className="mt-3 flex flex-col justify-center items-center w-full">
+                <IonButton
+                  onClick={() => {
+                    open();
+                  }}
+                >
+                  Envoyer
+                </IonButton>
+              </div> */}
+              {/* <div className="mt-3 flex flex-col justify-center items-center w-full">
+                <IonButton
+                  onClick={() => {
+                    initializeDatabase();
+                  }}
+                >
+                  Appeler
+                </IonButton>
+              </div> */}
+              <IonGrid className="grid1" id="step2">
                 <IonRow>
                   {data.map((card, index) => {
                     return (

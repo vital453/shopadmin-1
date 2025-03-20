@@ -8,11 +8,17 @@
     margin: 1rem;
 }
 
+.cartFooters {
+
+    border-top: 2px solid rgb(200, 200, 200);
+    background-color: white;
+    height: 180px;
+}
 .cartFooter {
 
     border-top: 2px solid rgb(200, 200, 200);
     background-color: white;
-    height: 70px;
+    height: 150px;
 }
 
 .cartCheckout ion-card-subtitle {

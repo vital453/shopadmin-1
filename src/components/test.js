@@ -1,3 +1,5 @@
+/* eslint-disable no-loop-func */
+/* eslint-disable no-undef */
 var express = require("express");
 var mysql = require("mysql");
 var cors = require("cors");
@@ -9,13 +11,23 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcryptjs");
 const fs = require("fs");
+const { google } = require("googleapis");
 // const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
 const jwt = require("jsonwebtoken");
+
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./uploads");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+var storagee = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./images");
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname);
@@ -47,10 +59,10 @@ app.listen("3004", () => {
 
 // mysql database connection
 const db = mysql.createConnection({
-  user: "benixags_vital14",
+  user: "verswllw_vital",
   host: "localhost",
-  password: "fnW*,jE_%hXl",
-  database: "benixags_shop",
+  password: ".(*xg;MVNu^^",
+  database: "verswllw_shop",
 });
 
 // check db connection
@@ -65,6 +77,245 @@ app.get("/", (req, res) => {
   res.json({ message: "OKAY" });
   console.log("server is running....");
 });
+
+//all products
+app.get("/allstore", (req, res) => {
+  db.query("SELECT * FROM sellers", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.get("/recup_database", (req, res) => {
+  // Récupérer la structure de la base de données
+  db.query("SHOW TABLES", (err, tables) => {
+    if (err) {
+      console.error("Erreur lors de la récupération des tables :", err);
+      return;
+    }
+
+    let sqlScript = "";
+
+    // Générer la structure des tables
+    tables.forEach((table, index) => {
+      const tableName = Object.values(table)[0];
+
+      db.query(`SHOW CREATE TABLE ${tableName}`, (err, result) => {
+        if (err) {
+          console.error(
+            `Erreur lors de la récupération de la structure de la table ${tableName} :`,
+            err
+          );
+          return;
+        }
+
+        const createTableSQL = result[0]["Create Table"];
+        sqlScript += `${createTableSQL};\n\n`;
+
+        // Vérifier si toutes les structures des tables ont été récupérées
+        if (index === tables.length - 1) {
+          // Générer les requêtes d'insertion des données
+          tables.forEach((table, index) => {
+            const tableName = Object.values(table)[0];
+
+            db.query(`SELECT * FROM ${tableName}`, (err, rows) => {
+              if (err) {
+                console.error(
+                  `Erreur lors de la récupération des données de la table ${tableName} :`,
+                  err
+                );
+                return;
+              }
+
+              if (rows.length > 0) {
+                const columns = Object.keys(rows[0]);
+                const columnNames = columns.join(", ");
+                const values = rows
+                  .map((row) =>
+                    columns
+                      .map((column) => {
+                        const value = row[column];
+                        return value !== null && typeof value === "string"
+                          ? `'${value}'`
+                          : value;
+                      })
+                      .join(", ")
+                  )
+                  .join("), (");
+
+                sqlScript += `INSERT INTO ${tableName} (${columnNames}) VALUES (${values});\n\n`;
+              }
+
+              // Vérifier si toutes les données des tables ont été récupérées
+              if (index === tables.length - 1) {
+                // Enregistrer le script SQL dans un fichier
+                // Ajouter les données supplémentaires au script SQL
+                const additionalSQL = `SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+                 START TRANSACTION;
+                 SET time_zone = "+00:00";\n\n`;
+
+                sqlScript = additionalSQL + sqlScript;
+
+                fs.writeFile("database.sql", sqlScript, (err) => {
+                  if (err) {
+                    console.error(
+                      "Erreur lors de l'enregistrement du script SQL :",
+                      err
+                    );
+                    return;
+                  }
+                  console.log(
+                    'Exportation de la base de données terminée. Le script SQL a été enregistré dans "database.sql".'
+                  );
+                  res.send("SQL");
+                  // res.send(
+                  //   'Exportation de la base de données terminée. Le script SQL a été enregistré dans "database.sql".'
+                  // );
+                });
+              }
+            });
+          });
+        }
+      });
+    });
+  });
+});
+
+const GOOGLE_API_FOLDER_ID = "1eBuNoOf_ifKI_qe0HXYNfrMx6_Gn0y9A";
+
+app.get("/save_in_drive", (req, res) => {
+  try {
+    // db.query("SELECT * FROM user", (err, result) => {
+    //   if (err) {
+    //     console.log(err);
+    //   } else {
+    //     // Convertir les résultats en format JSON
+    //     const jsonData = JSON.stringify(result);
+
+    //     fs.writeFileSync("digi.json", jsonData);
+    //     console.log(result, "resultat de la requete myssql");
+    //   }
+    // });
+    const auth = new google.auth.GoogleAuth({
+      keyFile: "./googlekey.json",
+      scopes: ["https://www.googleapis.com/auth/drive"],
+    });
+
+    const driveService = google.drive({
+      version: "v3",
+      auth,
+    });
+
+    const fileMetaData = {
+      name: "database.sql",
+      parents: ["1eBuNoOf_ifKI_qe0HXYNfrMx6_Gn0y9A"],
+    };
+
+    const media = {
+      mimetype: "application/json",
+      //   mimetype: "image/jpg",
+      body: fs.createReadStream("./database.sql"),
+      //   body: fs.createReadStream("./wallpaper.jpg"),
+    };
+
+    const response = driveService.files.create({
+      resource: fileMetaData,
+      media: media,
+      field: "id",
+    });
+    res.send("success");
+    // res.json({ message: "OKAY" });
+    // return response.data.id;
+  } catch (error) {
+    console.log("Upload file error", error);
+  }
+});
+//all products
+app.get("/allproducts", (req, res) => {
+  db.query("SELECT * FROM products", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+//aleatoire products
+app.get("/aleatoire_products", (req, res) => {
+  db.query("SELECT * FROM products order by rand() limit 1", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+//afficher les comptes
+app.post("/afficheboutiqueparcompte", (req, res) => {
+  const idcompte = req.body.idcompte;
+  db.query(
+    "SELECT * FROM sellers where id_compte = ?",
+    idcompte,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+// recup pass acces user
+app.post("/affichepassacess", (req, res) => {
+  const idcompte = req.body.idcompte;
+  db.query(
+    "SELECT pass_acces FROM compte where id = ?",
+    idcompte,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+// update pass acces user
+app.post("/updatepassacces", (req, res) => {
+  const idcompte = req.body.idcompte;
+  const pass_acces = req.body.pass_acces;
+  db.query(
+    "UPDATE compte SET pass_acces = ? where id = ?",
+    [pass_acces, idcompte],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+app.post("/addcompte", (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  const email = req.body.email;
+  db.query(
+    "INSERT INTO compte (username, password, email) VALUES (?,?,?)",
+    [username, password, email],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("succes");
+      }
+    }
+  );
+});
 //registration
 app.post("/register", (req, res) => {
   const username = req.body.username;
@@ -73,9 +324,10 @@ app.post("/register", (req, res) => {
   const type = req.body.type;
   const email = req.body.emaill;
   let idmax = 0;
+  let idmaxx = 0;
   if (type == "sellers") {
     db.query(
-      "SELECT * FROM sellers WHERE username = ?",
+      "SELECT * FROM compte WHERE username = ?",
       username,
       (err, result) => {
         // if(err){
@@ -106,15 +358,15 @@ app.post("/register", (req, res) => {
                   }
 
                   db.query(
-                    "INSERT INTO sellers (username, password, boutiqueName, email) VALUES (?,?,?,?)",
-                    [username, hash, code_parrain, email],
+                    "INSERT INTO compte (username, password, email) VALUES (?,?,?)",
+                    [username, hash, email],
                     (err, result) => {
                       if (err) {
                         console.log(err);
                       } else {
                         //  res.send("Values Inserted");
                         db.query(
-                          "SELECT  MAX(id) AS idm FROM sellers ",
+                          "SELECT  MAX(id) AS idm FROM compte ",
                           (err, result) => {
                             if (err) {
                               console.log(err);
@@ -122,11 +374,32 @@ app.post("/register", (req, res) => {
                               //res.send(result);
                               idmax = result[0].idm;
                               db.query(
-                                "insert into caisse(id_boutique, caisse) values (?,?)",
-                                [idmax, 0],
+                                "insert into sellers(boutiqueName, id_compte, username) values (?,?,?)",
+                                [code_parrain, idmax, username],
                                 (err, result) => {
                                   if (!err) {
-                                    res.send("success");
+                                    db.query(
+                                      "SELECT  MAX(id) AS idmm FROM sellers ",
+                                      (err, result) => {
+                                        if (err) {
+                                          console.log(err);
+                                        } else {
+                                          //res.send(result);
+                                          idmaxx = result[0].idmm;
+                                          db.query(
+                                            "insert into caisse(id_boutique, caisse) values (?,?)",
+                                            [idmaxx, 0],
+                                            (err, result) => {
+                                              if (!err) {
+                                                res.send("success");
+                                              } else {
+                                                console.log(err);
+                                              }
+                                            }
+                                          );
+                                        }
+                                      }
+                                    );
                                   } else {
                                     console.log(err);
                                   }
@@ -204,7 +477,7 @@ app.post("/login", (req, res) => {
             if (response) {
               const id = result[0].id;
               const token = jwt.sign({ id }, "jwtSecret", {
-                expiresIn: 6000,
+                expiresIn: 6000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000,
               });
               req.session.user = result;
 
@@ -236,7 +509,7 @@ app.post("/login", (req, res) => {
             if (response) {
               const id = result[0].id;
               const token = jwt.sign({ id }, "jwtSecret", {
-                expiresIn: 6000,
+                expiresIn: 30,
               });
               req.session.user = result;
 
@@ -256,6 +529,106 @@ app.post("/login", (req, res) => {
   }
 });
 
+app.post("/loginn", (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  const type = req.body.type;
+  let idboutique = 0;
+  if (type == "sellers") {
+    db.query(
+      "SELECT id FROM sellers where username = ?",
+      username,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        if (result.length > 0) {
+          idboutique = result[0].id;
+          db.query(
+            "SELECT * FROM compte WHERE username = ?",
+            username,
+            (err, result) => {
+              if (err) {
+                //   console.log(err);
+                res.send({ err: err });
+              }
+              //   res.send(result);
+              if (result.length > 0) {
+                bcrypt.compare(
+                  password,
+                  result[0].password,
+                  (error, response) => {
+                    if (response) {
+                      const id = result[0].id;
+                      const token = jwt.sign({ id }, "jwtSecret");
+                      req.session.user = result;
+
+                      // res.send(result);
+
+                      res.json({
+                        auth: true,
+                        token: token,
+                        idbout: idboutique,
+                        result: result,
+                      });
+                    } else {
+                      // res.send({ message: "Mauvaise combinaison"})
+                      res.json({
+                        auth: false,
+                        message: "Mauvaise combinaison",
+                      });
+                    }
+                  }
+                );
+              } else {
+                res.json({
+                  auth: false,
+                  message: "L'utilisateur n'existe pas",
+                });
+                // res.send({ message: "L'utilisateur n'existe pas"});
+              }
+            }
+          );
+        } else {
+          res.json({ auth: false, message: "L'utilisateur n'existe pas" });
+          // res.send({ message: "L'utilisateur n'existe pas"});
+        }
+      }
+    );
+  } else if (type == "clients") {
+    db.query(
+      "SELECT * FROM users WHERE username = ?",
+      username,
+      (err, result) => {
+        if (err) {
+          //   console.log(err);
+          res.send({ err: err });
+        }
+        //   res.send(result);
+        if (result.length > 0) {
+          bcrypt.compare(password, result[0].password, (error, response) => {
+            if (response) {
+              const id = result[0].id;
+              const token = jwt.sign({ id }, "jwtSecret", {
+                expiresIn: 30,
+              });
+              req.session.user = result;
+
+              // res.send(result);
+              res.json({ auth: true, token: token, result: result });
+            } else {
+              // res.send({ message: "Mauvaise combinaison"})
+              res.json({ auth: false, message: "Mauvaise combinaison" });
+            }
+          });
+        } else {
+          res.json({ auth: false, message: "L'utilisateur n'existe pas" });
+          // res.send({ message: "L'utilisateur n'existe pas"});
+        }
+      }
+    );
+  }
+});
 const verifyJWT = (req, res, next) => {
   const token = req.headers["x-access-token"];
 
@@ -365,18 +738,281 @@ app.put("/changepassword", async (req, res) => {
   }
 });
 
-//Liste categories
-app.get("/affichecategory", (req, res) => {
-  db.query("SELECT * FROM category", (err, result) => {
-    {
-      /* -la bibliothèque axios permet d'envoyer les requêtes de recherche sql dans la base de données grâce aux fonctions post get put  */
+//creation d'une nouvelle boutique
+app.post("/addboutique", (req, res) => {
+  const store_name = req.body.store_name;
+  const boutiqueName = req.body.boutiqueName;
+  const email = req.body.email;
+  const id_compte = req.body.id_compte;
+  let idmax = 0;
+  let idmaxx = 0;
+  db.query(
+    "SELECT * FROM sellers WHERE username = ?",
+    store_name,
+    (err, result) => {
+      // if(err){
+      //   console.log(err);
+      //   res.send({ err: err});
+
+      // }
+      //   res.send(result);
+      if (result.length > 0) {
+        res.json({
+          regist: false,
+          message: "Ce nom d'utilisateur existe déjà !",
+        });
+      } else {
+        db.query(
+          "SELECT * FROM sellers WHERE boutiqueName = ?",
+          boutiqueName,
+          (err, result) => {
+            if (result.length > 0) {
+              res.json({
+                regist: false,
+                message: "Ce code de parrainage existe déjà !",
+              });
+            } else {
+              db.query(
+                "insert into sellers(id_compte, username,  store_name, boutiqueName) values (?,?,?,?)",
+                [id_compte, store_name, store_name, boutiqueName],
+                (err, result) => {
+                  if (!err) {
+                    db.query(
+                      "SELECT  MAX(id) AS idmm FROM sellers ",
+                      (err, result) => {
+                        if (err) {
+                          console.log(err);
+                        } else {
+                          //res.send(result);
+                          idmaxx = result[0].idmm;
+                          db.query(
+                            "insert into caisse(id_boutique, caisse) values (?,?)",
+                            [idmaxx, 0],
+                            (err, result) => {
+                              if (!err) {
+                                res.send("succes");
+                              } else {
+                                console.log(err);
+                              }
+                            }
+                          );
+                        }
+                      }
+                    );
+                  } else {
+                    console.log(err);
+                  }
+                }
+              );
+            }
+          }
+        );
+      }
     }
+  );
+});
+
+//initialiser les droits d'acees
+app.get("/initialse_access", (req, res) => {
+  let id_boutique = 0;
+  let idmaxx = 0;
+  let id_compte = 0;
+  let username = "";
+  db.query("SELECT  MAX(id) AS idmm FROM sellers ", (err, result) => {
     if (err) {
       console.log(err);
     } else {
-      res.send(result);
+      //res.send(result);
+      idmaxx = result[0].idmm;
+      db.query(
+        "SELECT id_compte, username, id FROM sellers WHERE id = ?",
+        idmaxx,
+        (err, result) => {
+          if (!err) {
+            id_boutique = result[0].id;
+            id_compte = result[0].id_compte;
+            username = result[0].username;
+            db.query(
+              "insert into acces(id_compte, id_boutique, store_name, gestion_vente, gestion_produit, histo_operation, histo_vente, histo_depense, histo_appro, finance_day, finance_periode, gestion_caisse, gestion_depense, gestion_decaisse, gestion_commande_attente) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+              [
+                id_compte,
+                id_boutique,
+                username,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+              ],
+              (err, result) => {
+                if (!err) {
+                  res.send("success");
+                } else {
+                  console.log(err);
+                }
+              }
+            );
+          } else {
+            console.log(err);
+          }
+        }
+      );
     }
   });
+});
+
+app.post("/majaccesboutique", (req, res) => {
+  const store_name = req.body.store_name;
+  const id_compte = req.body.id_compte;
+  const id_boutique = req.body.id_boutique;
+  const gestion_vente = req.body.gestion_vente;
+  const gestion_produit = req.body.gestion_produit;
+  const histo_operation = req.body.histo_operation;
+  const histo_vente = req.body.histo_vente;
+  const histo_depense = req.body.histo_depense;
+  const histo_appro = req.body.histo_appro;
+  const finance_day = req.body.finance_day;
+  const finance_periode = req.body.finance_periode;
+  const gestion_caisse = req.body.gestion_caisse;
+  const gestion_depense = req.body.gestion_depense;
+  const gestion_decaisse = req.body.gestion_decaisse;
+  const gestion_commande_attente = req.body.gestion_commande_attente;
+  db.query(
+    "SELECT * FROM acces where id_boutique = ?",
+    [id_boutique],
+    (err, result) => {
+      if (result.length > 0) {
+        db.query(
+          "UPDATE acces SET gestion_vente = ?, gestion_produit = ?, histo_operation = ?, histo_vente = ?, histo_depense = ?, histo_appro = ?, finance_day = ?, finance_periode = ?, gestion_caisse = ?, gestion_depense = ?, gestion_decaisse = ?, gestion_commande_attente = ? where id_compte = ? and id_boutique = ?",
+          [
+            gestion_vente,
+            gestion_produit,
+            histo_operation,
+            histo_vente,
+            histo_depense,
+            histo_appro,
+            finance_day,
+            finance_periode,
+            gestion_caisse,
+            gestion_depense,
+            gestion_decaisse,
+            gestion_commande_attente,
+            id_compte,
+            id_boutique,
+          ],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              res.send("success");
+            }
+          }
+        );
+      } else {
+        //  res.send("blablablabla");
+        db.query(
+          "insert into acces(id_compte, id_boutique, store_name, gestion_vente, gestion_produit, histo_operation, histo_vente, histo_depense, histo_appro, finance_day, finance_periode, gestion_caisse, gestion_depense, gestion_decaisse, gestion_commande_attente) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+          [
+            id_compte,
+            id_boutique,
+            store_name,
+            gestion_vente,
+            gestion_produit,
+            histo_operation,
+            histo_vente,
+            histo_depense,
+            histo_appro,
+            finance_day,
+            finance_periode,
+            gestion_caisse,
+            gestion_depense,
+            gestion_decaisse,
+            gestion_commande_attente,
+          ],
+          (err, result) => {
+            if (!err) {
+              res.send("success");
+            } else {
+              console.log(err);
+            }
+          }
+        );
+      }
+    }
+  );
+});
+
+app.post("/afficheaccesparboutique", (req, res) => {
+  const id_compte = req.body.id_compte;
+  db.query(
+    "SELECT * FROM acces where id_compte = ?",
+    [id_compte],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+//verif parrain
+app.post("/verif_parrainage", (req, res) => {
+  const boutique = req.body.boutique;
+  db.query(
+    "SELECT * FROM sellers WHERE boutiqueName = ?",
+    [boutique],
+    (err, result) => {
+      if (result.length > 0) {
+        res.json({ message: "succ", result: result });
+      } else {
+        res.json({ message: "sacc", auth: false });
+      }
+    }
+  );
+});
+//Liste categories
+app.post("/affichecategory", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "SELECT * FROM category where seller_id = ?",
+    id_boutique,
+    (err, result) => {
+      {
+        /* -la bibliothèque axios permet d'envoyer les requêtes de recherche sql dans la base de données grâce aux fonctions post get put  */
+      }
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+//crée categories
+app.post("/addcategory", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  const name = req.body.name;
+  // const description = req.body.description;
+  db.query(
+    "INSERT INTO category (nom, seller_id) VALUES (?,?)",
+    [name, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("succ");
+      }
+    }
+  );
 });
 
 //Liste libellé statut
@@ -396,13 +1032,18 @@ app.get("/affichelibstat", (req, res) => {
 //récupération d'une category
 app.post("/recupcat", (req, res) => {
   const id = req.body.id;
-  db.query("SELECT * FROM category  WHERE id =?", id, (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.send(result);
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "SELECT * FROM category  WHERE id =? and seller_id = ?",
+    [id, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
     }
-  });
+  );
 });
 
 app.get("/supprpan", (req, res) => {
@@ -447,14 +1088,15 @@ app.put("/majlike", (req, res) => {
   const id = req.body.id;
   const nblike = req.body.nblike;
   const addlike = req.body.addlike;
+  const id_boutique = req.body.id_boutique;
   db.query(
-    "UPDATE products SET like_number = ? WHERE id = ? ",
-    [nblike + addlike, id],
+    "UPDATE products SET like_number = ? WHERE id = ? and seller_id = ?",
+    [nblike + addlike, id, id_boutique],
     (err, result) => {
       if (err) {
         console.log(err);
       } else {
-        res.send(success);
+        res.send("success");
       }
     }
   );
@@ -507,6 +1149,21 @@ app.post("/ajoutpanier", (req, res) => {
   );
 });
 
+app.post("/total_command_byseller", (req, res) => {
+  const invoice = req.body.invoice;
+  db.query(
+    "SELECT invoice, whatsapp, SUM(total_price) AS TOTALPRICE , SUM(product_quantity) AS TOTALQUANTITE, seller_id FROM commands WHERE invoice = ? GROUP BY seller_id ASC",
+    invoice,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
 // créer une commande
 app.post("/ajoutcommande", (req, res) => {
   const totalquant = req.body.totalquant;
@@ -514,9 +1171,115 @@ app.post("/ajoutcommande", (req, res) => {
   const invoice = req.body.invoice;
   const whatsapp = req.body.whatsapp;
   const id_boutique = req.body.id_boutique;
+  const status_paiement = req.body.status_paiement;
+  const status_id_command = 3;
+  if (status_paiement == "NON PAYER") {
+    db.query(
+      "INSERT INTO command_validation (invoice, total_quantity, total_price, whatsapp,seller_id, status_paiement, status_id_command) VALUES (?,?,?,?,?,?,?)",
+      [
+        invoice,
+        totalquant,
+        totalprix,
+        whatsapp,
+        id_boutique,
+        status_paiement,
+        status_id_command,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("suc");
+        }
+      }
+    );
+  } else {
+    db.query(
+      "INSERT INTO command_validation (invoice, total_quantity, total_price, whatsapp,seller_id, status_paiement) VALUES (?,?,?,?,?,?)",
+      [invoice, totalquant, totalprix, whatsapp, id_boutique, status_paiement],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("suc");
+        }
+      }
+    );
+  }
+});
+
+app.post("/maj_status_paiment", (req, res) => {
+  const invoice = req.body.invoice;
+  const id_boutique = req.body.id_boutique;
+  const transactionId = req.body.transactionId;
+  const status_paiement = "PAYER";
   db.query(
-    "INSERT INTO command_validation (invoice, total_quantity, total_price, whatsapp,seller_id) VALUES (?,?,?,?,?)",
-    [invoice, totalquant, totalprix, whatsapp, id_boutique],
+    "UPDATE command_validation SET status_paiement = ?, transactionId = ? WHERE invoice = ? and seller_id = ?",
+    [status_paiement, transactionId, invoice, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.post("/listecommandenum", (req, res) => {
+  const invoice = req.body.invoice;
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "SELECT seller_id, product_id, product_name FROM commands WHERE invoice = ? and seller_id = ?",
+    [invoice, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.post("/verif_valid_fac", (req, res) => {
+  const invoice = req.body.invoice;
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "SELECT transactionId FROM command_validation WHERE invoice = ? and seller_id = ?",
+    [invoice, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+app.get("/listeproduitnum", (req, res) => {
+  db.query("SELECT * FROM numeric_product", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+// créer une vente
+app.post("/ajoutvente", (req, res) => {
+  const totalquant = req.body.totalquant;
+  const totalprix = req.body.totalprix;
+  const invoice = req.body.invoice;
+  const status = 3;
+  const whatsapp = req.body.whatsapp;
+  const id_boutique = req.body.id_boutique;
+  const date = req.body.date;
+
+  db.query(
+    "INSERT INTO command_validation (invoice, total_quantity, total_price, status_id_command, whatsapp,seller_id,date) VALUES (?,?,?,?,?,?,FROM_UNIXTIME(?))",
+    [invoice, totalquant, totalprix, status, whatsapp, id_boutique, date],
     (err, result) => {
       if (err) {
         console.log(err);
@@ -527,17 +1290,168 @@ app.post("/ajoutcommande", (req, res) => {
   );
 });
 
-// créer une vente
-app.post("/ajoutvente", (req, res) => {
-  const totalquant = req.body.totalquant;
-  const totalprix = req.body.totalprix;
+//delete commande
+app.post("/deletevente", (req, res) => {
   const invoice = req.body.invoice;
-  const status = 3;
-  const whatsapp = "";
-  const id_boutique = req.body.id_boutique;
+  db.query("DELETE FROM commands WHERE invoice = ?", invoice, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      db.query(
+        "DELETE FROM command_validation WHERE invoice = ?",
+        invoice,
+        (err, result) => {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("succes");
+            res.send("succes");
+          }
+        }
+      );
+    }
+  });
+});
+
+//add featured products
+app.post("/addfeaturedprod", (req, res) => {
+  const id_row = req.body.id_row;
+  const status = "Actif";
+  // const id_product = req.body.id_product;
+  // const id_product = req.body.id_product;
+  // const description = req.body.description;
+  // db.query(
+  //   "SELECT * FROM featured_products WHERE id_product = ?",
+  //   id_product,
+  //   (err, result) => {
+  //     if (result.length > 0) {
+  //       res.send("ce produit a deja ete ajouter au tendance");
+  //     } else {
+  //       db.query(
+  //         "INSERT INTO featured_products (id_boutique, id_product) VALUES (?,?)",
+  //         [id_boutique, id_product],
+  //         (err, result) => {
+  //           if (err) {
+  //             console.log(err);
+  //           } else {
+  //             res.send("succes");
+  //           }
+  //         }
+  //       );
+  //     }
+  //   }
+  // );
   db.query(
-    "INSERT INTO command_validation (invoice, total_quantity, total_price, status_id_command, whatsapp,seller_id) VALUES (?,?,?,?,?,?)",
-    [invoice, totalquant, totalprix, status, whatsapp, id_boutique],
+    "UPDATE promotion SET status = ? WHERE id = ?",
+    [status, id_row],
+    (err, result) => {
+      if (err) {
+        res.send("err");
+      } else {
+        res.send("succes");
+      }
+    }
+  );
+});
+app.post("/addpromotionprod", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  const id_product = req.body.id_product;
+  const date_debut = req.body.date_debut;
+  const date_fin = req.body.date_fin;
+  const whatsapp = req.body.whatsapp;
+  const status = "Actif";
+  // const dateObj1 = new Date(parseInt(date_debut) * 1000);
+  // const dateObj2 = new Date(parseInt(date_fin) * 1000);
+  // const dateObj1 = FROM_UNIXTIME(parseInt(date_debut));
+  // const dateObj2 = FROM_UNIXTIME(parseInt(date_fin));
+
+  // const formattedDate1 = dateObj1.toISOString();
+
+  // const formattedDate2 = dateObj2.toISOString();
+  // const description = req.body.description;
+  // db.query(
+  //   "SELECT * FROM promotion WHERE id_product = ? and status = ?",
+  //   [id_product, status],
+  //   (err, result) => {
+  //     if (result.length > 0) {
+  //       res.send("ce produit est deja en promotion");
+  //     } else {
+  //       db.query(
+  //         "INSERT INTO promotion (id_boutique, id_product, date_debut, date_fin, whatsapp) VALUES (?,?,FROM_UNIXTIME(?),FROM_UNIXTIME(?),?)",
+  //         [id_boutique, id_product, date_debut, date_fin, whatsapp],
+  //         (err, result) => {
+  //           if (err) {
+  //             console.log(err);
+  //           } else {
+  //             res.send("succes");
+  //           }
+  //         }
+  //       );
+  //     }
+  //   }
+  // );
+  db.query(
+    "INSERT INTO promotion (id_boutique, id_product, date_debut, date_fin, whatsapp) VALUES (?,?,FROM_UNIXTIME(?),FROM_UNIXTIME(?),?)",
+    [id_boutique, id_product, date_debut, date_fin, whatsapp],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("succes");
+      }
+    }
+  );
+});
+
+//delete featured products
+app.post("/deletefeaturedprod", (req, res) => {
+  const id_row = req.body.id_row;
+  const status = "Inactif";
+  db.query(
+    "UPDATE promotion SET status = ? WHERE id = ?",
+    [status, id_row],
+    (err, result) => {
+      if (err) {
+        res.send("err");
+      } else {
+        res.send("succes");
+      }
+    }
+  );
+  // db.query(
+  //   "DELETE FROM featured_products WHERE id_product = ?",
+  //   id,
+  //   (err, result) => {
+  //     if (err) {
+  //       console.log(err);
+  //     } else {
+  //       console.log("succes");
+  //       res.send("succes");
+  //     }
+  //   }
+  // );
+});
+
+//all featured products
+app.get("/allfeaturedproducts", (req, res) => {
+  db.query("SELECT * FROM featured_products", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+//nouvelle demande de fonctionnalité
+app.post("/demande_fonctionnalite", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  const store_name = req.body.store_name;
+  const whatsapp = req.body.whatsapp;
+  const demande = req.body.demande;
+  db.query(
+    "INSERT INTO demande_fonctionnalité (id_boutique, store_name, whatsapp, demande) VALUES (?,?,?,?)",
+    [id_boutique, store_name, whatsapp, demande],
     (err, result) => {
       if (err) {
         console.log(err);
@@ -546,6 +1460,17 @@ app.post("/ajoutvente", (req, res) => {
       }
     }
   );
+});
+
+//recuperer toutes les demandes de fonctionnalité
+app.get("/getalldemande", (req, res) => {
+  db.query("SELECT * FROM demande_fonctionnalité", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
 });
 
 app.post("/ajoutapprov", (req, res) => {
@@ -572,11 +1497,13 @@ app.post("/ajoutcomList", (req, res) => {
   let newnum = 0;
   const panier = req.body.panier;
   let id = 0;
+  const status = 1;
   let taillecom = [];
   const tail = req.body.tail;
   const whatsapp = req.body.whatsapp;
   const picture1 = "uploads/1660942837.jpg";
-  const id_boutique = req.body.id_boutique;
+  // const id_boutique = req.body.id_boutique;
+  let invoice = "";
 
   db.query("SELECT * FROM command_validation", (err, result) => {
     if (err) {
@@ -600,28 +1527,6 @@ app.post("/ajoutcomList", (req, res) => {
                     numfin = parseInt(result[0].invoice.slice(5));
                     newnum = numfin + 1;
                     invoice = `FAB00${newnum}`;
-                    for (var i = 0; i < tail; i++) {
-                      db.query(
-                        "INSERT INTO commands (product_quantity, total_price , unite_price , product_name,product_id, invoice, whatsapp,picture,seller_id) VALUES (?,?,?,?,?,?,?,?,?)",
-                        [
-                          panier[i].product_quantity,
-                          panier[i].total_price,
-                          panier[i].unite_price,
-                          panier[i].product_name,
-                          panier[i].product_id,
-                          invoice,
-                          whatsapp,
-                          picture1,
-                          id_boutique,
-                        ],
-                        (err, result) => {
-                          if (err) {
-                            console.log(err);
-                          } else {
-                          }
-                        }
-                      );
-                    }
                     res.send(invoice);
                   }
                 }
@@ -632,6 +1537,223 @@ app.post("/ajoutcomList", (req, res) => {
       }
     }
   });
+});
+app.post("/ajoutcomList1", (req, res) => {
+  let numfin = 0;
+  let newnum = 0;
+  const panier = req.body.panier;
+  let id = 0;
+  const status = 1;
+  let taillecom = [];
+  const tail = req.body.tail;
+  const whatsapp = req.body.whatsapp;
+  const product_quantity = req.body.product_quantity;
+  const total_price = req.body.total_price;
+  const unite_price = req.body.unite_price;
+  const product_name = req.body.product_name;
+  const product_id = req.body.product_id;
+  const stock = req.body.stock;
+  const picture1 = req.body.picture1;
+  const BoutiqueId = req.body.BoutiqueId;
+  const total_sold = req.body.total_sold;
+  const invoice = req.body.invoice;
+  const quantifiable_product = req.body.quantifiable_product;
+
+  db.query(
+    "INSERT INTO commands (product_quantity, total_price , unite_price , product_name,product_id, stock, invoice, whatsapp, picture, seller_id, status_id_command, total_sold, quantifiable_product) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    [
+      product_quantity,
+      total_price,
+      unite_price,
+      product_name,
+      product_id,
+      stock,
+      invoice,
+      whatsapp,
+      picture1,
+      BoutiqueId,
+      status,
+      total_sold,
+      quantifiable_product,
+    ],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+app.post("/ajoutcomList2", (req, res) => {
+  let numfin = 0;
+  let newnum = 0;
+  const panier = req.body.panier;
+  let id = 0;
+  const status = 1;
+  let taillecom = [];
+  const tail = req.body.tail;
+  const whatsapp = req.body.whatsapp;
+  const product_quantity = req.body.product_quantity;
+  const total_price = req.body.total_price;
+  const unite_price = req.body.unite_price;
+  const product_name = req.body.product_name;
+  const product_id = req.body.product_id;
+  const stock = req.body.stock;
+  const picture1 = req.body.picture1;
+  const BoutiqueId = req.body.BoutiqueId;
+  const total_sold = req.body.total_sold;
+  const quantifiable_product = req.body.quantifiable_product;
+  // const picture1 = "uploads/1660942837.jpg";
+  // const id_boutique = req.body.id_boutique;
+  let invoice = "";
+
+  db.query("SELECT * FROM command_validation", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      if (result) {
+        db.query(
+          "SELECT MAX(id) AS TOTA FROM command_validation",
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              id = result[0].TOTA;
+              db.query(
+                "SELECT * FROM command_validation WHERE id = ?",
+                id,
+                (err, result) => {
+                  if (err) {
+                    console.log(err);
+                  } else {
+                    numfin = parseInt(result[0].invoice.slice(5));
+                    newnum = numfin + 1;
+                    invoice = `FAB00${newnum}`;
+                    // for (var i = 0; i < tail; i++) {
+
+                    // }
+                    db.query(
+                      "INSERT INTO commands (product_quantity, total_price , unite_price , product_name,product_id, stock, invoice, whatsapp, picture, seller_id, status_id_command, total_sold, quantifiable_product) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                      [
+                        product_quantity,
+                        total_price,
+                        unite_price,
+                        product_name,
+                        product_id,
+                        stock,
+                        invoice,
+                        whatsapp,
+                        picture1,
+                        BoutiqueId,
+                        status,
+                        total_sold,
+                        quantifiable_product,
+                      ],
+                      (err, result) => {
+                        if (err) {
+                          console.log(err);
+                        } else {
+                          res.send(invoice);
+                        }
+                      }
+                    );
+                  }
+                }
+              );
+            }
+          }
+        );
+      }
+    }
+  });
+});
+
+app.post("/ajoutventeList", (req, res) => {
+  let numfin = 0;
+  let newnum = 0;
+  let id = 0;
+  const status = 3;
+  let invoice = "";
+
+  db.query("SELECT * FROM command_validation", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      if (result) {
+        db.query(
+          "SELECT MAX(id) AS TOTA FROM command_validation",
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              id = result[0].TOTA;
+              db.query(
+                "SELECT * FROM command_validation WHERE id = ?",
+                id,
+                (err, result) => {
+                  if (err) {
+                    console.log(err);
+                  } else {
+                    numfin = parseInt(result[0].invoice.slice(5));
+                    newnum = numfin + 1;
+                    invoice = `FAB00${newnum}`;
+                    res.send(invoice);
+                  }
+                }
+              );
+            }
+          }
+        );
+      }
+    }
+  });
+});
+app.post("/ajoutventeList2", (req, res) => {
+  let numfin = 0;
+  let newnum = 0;
+  let id = 0;
+  const status = 3;
+  const whatsapp = req.body.whatsapp;
+  const picture1 = "uploads/1660942837.jpg";
+  const id_boutique = req.body.id_boutique;
+  const product_quantity = req.body.product_quantity;
+  const total_price = req.body.total_price;
+  const unite_price = req.body.unite_price;
+  const product_name = req.body.product_name;
+  const product_id = req.body.product_id;
+  const stock = req.body.stock;
+  const invoice = req.body.invoice;
+  const total_sold = req.body.total_sold;
+  const quantifiable_product = req.body.quantifiable_product;
+  const command_date = req.body.command_date;
+
+  db.query(
+    "INSERT INTO commands (product_quantity, total_price , unite_price , product_name, product_id, stock, invoice, whatsapp, picture, seller_id, status_id_command, total_sold, quantifiable_product,command_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,FROM_UNIXTIME(?))",
+    [
+      product_quantity,
+      total_price,
+      unite_price,
+      product_name,
+      product_id,
+      stock,
+      invoice,
+      whatsapp,
+      picture1,
+      id_boutique,
+      status,
+      total_sold,
+      quantifiable_product,
+      command_date,
+    ],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("succes");
+      }
+    }
+  );
 });
 
 app.post("/ajoutapprovList", (req, res) => {
@@ -736,12 +1858,49 @@ app.post("/ajoutapprovList1", (req, res) => {
   );
 });
 
+app.post("/ajoutapprovList12", (req, res) => {
+  let numfin = 0;
+  let newnum = 0;
+  const stock_appro = req.body.stock_appro;
+  const total_price = req.body.total_price;
+  const unite_price = req.body.unite_price;
+  const product_name = req.body.product_name;
+  const product_id = req.body.product_id;
+  const stock_preview = req.body.stock_preview;
+  const picture = req.body.picture;
+  let id = 0;
+  let invoice = 0;
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "INSERT INTO approvisionnement (stock_appro, total_price , unite_price , product_name,product_id, invoice, stock_preview,picture,seller_id) VALUES (?,?,?,?,?,?,?,?,?)",
+    [
+      stock_appro,
+      total_price,
+      unite_price,
+      product_name,
+      product_id,
+      invoice,
+      stock_preview,
+      picture,
+      id_boutique,
+    ],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        /* res.json({ind:i}); */
+        res.send("suc");
+      }
+    }
+  );
+});
+
 app.post("/reclusia", (req, res) => {
   const pan = req.body.panier;
 
   db.query(
     "SELECT * FROM products  WHERE id =?",
-    panier[0].product_id,
+    pan[0].product_id,
     (err, result) => {
       if (err) {
         console.log(err);
@@ -755,14 +1914,18 @@ app.post("/reclusia", (req, res) => {
 //récupération d'un article
 app.post("/recupart", (req, res) => {
   const id = req.body.id;
-
-  db.query("SELECT * FROM products  WHERE id =?", id, (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.send(result);
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "SELECT * FROM products  WHERE id =? and seller_id = ?",
+    [id, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
     }
-  });
+  );
 });
 //test
 app.post("/test1", (req, res) => {
@@ -774,7 +1937,6 @@ app.post("/test1", (req, res) => {
 //liste des articles
 app.post("/afficheart", (req, res) => {
   const id_boutique = req.body.id_boutique;
-
   db.query(
     "SELECT * FROM products where seller_id = ?",
     id_boutique,
@@ -800,9 +1962,11 @@ app.get("/afficheartcroiss", (req, res) => {
 
 //`SELECT * FROM todotbl ORDER BY id DESC LIMIT 10`
 
-app.get("/arrivage", (req, res) => {
+app.post("/arrivage", (req, res) => {
+  const id_boutique = req.body.id_boutique;
   db.query(
-    `SELECT * FROM products ORDER BY id DESC LIMIT 10`,
+    `SELECT * FROM products where seller_id = ? ORDER BY id DESC LIMIT 10`,
+    id_boutique,
     (err, result) => {
       if (err) {
         console.log(err);
@@ -815,9 +1979,10 @@ app.get("/arrivage", (req, res) => {
 
 app.post("/recent", (req, res) => {
   const dateact = req.body.dateact;
+  const id_boutique = req.body.id_boutique;
   db.query(
-    `SELECT * FROM products WHERE creation_date >= ?`,
-    dateact,
+    `SELECT * FROM products WHERE creation_date >= ? and seller_id = ?`,
+    [dateact, id_boutique],
     (err, result) => {
       if (err) {
         console.log(err);
@@ -828,14 +1993,19 @@ app.post("/recent", (req, res) => {
   );
 });
 
-app.get("/populaire", (req, res) => {
-  db.query(`SELECT * FROM products WHERE like_number >= 50`, (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.send(result);
+app.post("/populaire", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    `SELECT * FROM products WHERE like_number >= 50 and seller_id = ? `,
+    id_boutique,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
     }
-  });
+  );
 });
 
 app.get("/datenow", (req, res) => {
@@ -851,9 +2021,10 @@ app.get("/datenow", (req, res) => {
 //liste des articles par categorie
 app.post("/articlecateg", (req, res) => {
   const idcat = req.body.idcat;
+  const id_boutique = req.body.id_boutique;
   db.query(
-    "SELECT * FROM products  WHERE category_id =?",
-    idcat,
+    "SELECT * FROM products  WHERE category_id =? and seller_id = ?",
+    [idcat, id_boutique],
     (err, result) => {
       if (err) {
         console.log(err);
@@ -869,6 +2040,21 @@ app.post("/affichecommande", (req, res) => {
   const id_boutique = req.body.id_boutique;
   db.query(
     "SELECT * FROM command_validation where seller_id = ?",
+    id_boutique,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.post("/affichecommandeart", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "SELECT * FROM commands where seller_id = ?",
     id_boutique,
     (err, result) => {
       if (err) {
@@ -929,34 +2115,15 @@ app.post("/afficheartcom", (req, res) => {
 
 //liste articles par approvisionnement
 app.post("/afficheartapprov", (req, res) => {
-  const invoice = req.body.invoice;
   const id_boutique = req.body.id_boutique;
   db.query(
-    "SELECT * FROM approvisionnement WHERE invoice =? and seller_id = ?",
-    [invoice, id_boutique],
+    "SELECT * FROM approvisionnement WHERE seller_id = ?",
+    [id_boutique],
     (err, result) => {
       if (err) {
         console.log(err);
       } else {
         res.send(result);
-      }
-    }
-  );
-});
-
-//mise à jour satut
-app.post("/majstatut", (req, res) => {
-  const invoice = req.body.invoice;
-  const stat = req.body.stat;
-  const id_boutique = req.body.id_boutique;
-  db.query(
-    "UPDATE command_validation SET status_id_command = ? WHERE invoice =? and seller_id = ?",
-    [stat, invoice, id_boutique],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("success");
       }
     }
   );
@@ -1013,6 +2180,7 @@ app.put("/imga/:id/:stat", async (req, res) => {
         res.send(err);
       } else {
         res.json({ success: 1 });
+        // res.send("suc");
       }
       //	res.json({ success: 1 }) ;
       //   res.send(id+"");
@@ -1021,6 +2189,38 @@ app.put("/imga/:id/:stat", async (req, res) => {
 
   //res.send(id+"");
 });
+
+app.put("/imgbn", async (req, res) => {
+  // 'avatar' is the name of our file input field in the HTML form
+  let upload = multer({ storage: storagee }).single("avatar");
+
+  upload(req, res, function (err) {
+    // req.file contains information of uploaded file
+    // req.body contains information of text fields
+
+    if (!req.file) {
+      return res.send("Please select an image to upload");
+    } else if (err instanceof multer.MulterError) {
+      return res.send(err);
+    } else if (err) {
+      return res.send(err);
+    } else return res.send("imgbn");
+  });
+});
+// const upload1 = multer({ storage: storagee });
+// app.post("/imgbn", upload1.single("avatar"), (req, res) => {
+//   // 'avatar' is the name of our file input field in the HTML form
+//   //let upload = multer({ storage: storagee }).single("avatar");
+
+//  if (!req.file) {
+//       return res.send("Please select an image to upload");
+//     } else if (err instanceof multer.MulterError) {
+//       return res.send(err);
+//     } else if (err) {
+//       return res.send(err);
+//     }else return res.send('imgbn');
+
+// });
 
 app.post("/newart", async (req, res) => {
   const nom = req.body.nom;
@@ -1035,10 +2235,13 @@ app.post("/newart", async (req, res) => {
   const delailivre = req.body.delailivre;
   const disponibilite = req.body.disponibilite;
   const prixachat = req.body.prixachat;
+  const paiment_mode = req.body.paiment_mode;
+  const type_product = req.body.type_product;
+  const quantifiable_product = req.body.quantifiable_product;
   const id_boutique = req.body.id_boutique;
   const picture1 = "uploads/aliments.png";
   db.query(
-    "INSERT INTO products (name,price,description,discount,seller_id,stock, category_id, cost,picture1 ) VALUES (?,?,?,?,?,?,?,?,?)",
+    "INSERT INTO products (name, price, description, discount, seller_id, stock, category_id, cost, picture1, paiment_mode, type_product, quantifiable_product) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
     [
       nom,
       prix,
@@ -1049,6 +2252,9 @@ app.post("/newart", async (req, res) => {
       category,
       prixachat,
       picture1,
+      paiment_mode,
+      type_product,
+      quantifiable_product,
     ],
     (err, result) => {
       if (err) {
@@ -1110,26 +2316,241 @@ app.post("/editerart", async (req, res) => {
   );
 });
 
-app.post("/supprart", (req, res) => {
-  const id = req.body.id;
-  //supprimer img
-  fs.unlink("uploads/yelan.png", (err) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
+app.post("/update_art_after_sup", async (req, res) => {
+  const invoice = req.body.invoice;
+  const id_boutique = req.body.id_boutique;
+  var product_quantity = 0;
+  var total_price = 0;
 
-    //file removed
-  });
-  //
-  db.query("DELETE FROM products WHERE id = ?", id, (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("succes");
-      res.send("succ12");
+  db.query(
+    "SELECT * FROM commands WHERE invoice = ? and seller_id = ?",
+    [invoice, id_boutique],
+    (err, result) => {
+      if (result.length > 0) {
+        db.query(
+          "SELECT SUM(product_quantity) as product_quantity, SUM(total_price) as total_price FROM commands WHERE invoice = ? and seller_id = ?",
+          [invoice, id_boutique],
+          (err, result) => {
+            product_quantity = parseInt(result[0].product_quantity);
+            total_price = parseInt(result[0].total_price);
+            db.query(
+              "UPDATE command_validation SET total_quantity = ?, total_price = ? WHERE invoice = ? and seller_id = ?",
+              [product_quantity, total_price, invoice, id_boutique],
+              (err, result) => {
+                if (err) {
+                  console.log(err);
+                } else {
+                  res.send("succes");
+                }
+              }
+            );
+          }
+        );
+      } else {
+        db.query(
+          "DELETE FROM command_validation WHERE invoice = ? and seller_id = ? ",
+          [invoice, id_boutique],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              res.send("succes");
+            }
+          }
+        );
+      }
     }
-  });
+  );
+});
+
+app.post("/suppr_art_after_upda", async (req, res) => {
+  const id = req.body.id;
+  const id_boutique = req.body.id_boutique;
+  const pic1 = req.body.pic1;
+  const pic2 = req.body.pic2;
+  const pic3 = req.body.pic3;
+  const pic4 = req.body.pic4;
+  const vid = req.body.vid;
+  db.query(
+    "DELETE FROM products WHERE id = ? and seller_id = ? ",
+    [id, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        if (pic1 !== "") {
+          fs.unlink(`${pic1}`, (err) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
+            //file removed
+          });
+        } else {
+          console.log("succes");
+          res.send("pic1 non trouver");
+        }
+        if (pic2 !== "") {
+          fs.unlink(`${pic2}`, (err) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
+            //file removed
+          });
+        } else {
+          // console.log("succes");
+          res.send("pic2 non trouver");
+        }
+        if (pic3 !== "") {
+          fs.unlink(`${pic3}`, (err) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
+            //file removed
+          });
+        } else {
+          // console.log("succes");
+          res.send("pic3 non trouver");
+        }
+        if (pic4 !== "") {
+          fs.unlink(`${pic4}`, (err) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
+            //file removed
+          });
+        } else {
+          // console.log("succes");
+          res.send("pic4 non trouver");
+        }
+        if (vid !== "") {
+          fs.unlink(`${vid}`, (err) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
+            //file removed
+          });
+        } else {
+          // console.log("succes");
+          res.send("vid non trouver");
+        }
+        res.send("succes");
+        // res.json({ success: 1, message: "succes" });
+      }
+    }
+  );
+});
+
+app.post("/supprimer_article", (req, res) => {
+  const id = req.body.id;
+  const id_boutique = req.body.id_boutique;
+  const pic1 = req.body.pic1;
+  const pic2 = req.body.pic2;
+  const pic3 = req.body.pic3;
+  const pic4 = req.body.pic4;
+  const vid = req.body.vid;
+  var invoice = "";
+
+  db.query(
+    "SELECT invoice FROM commands WHERE status_id_command <> '3' and product_id = ?",
+    [id],
+    (err, result) => {
+      if (result.length > 0) {
+        for (var i = 0; i < result.length; i++) {
+          invoice = String(result[i].invoice);
+          db.query(
+            "DELETE FROM commands WHERE product_id = ? and  invoice = ?",
+            [id, invoice],
+            (err, result) => {
+              if (err) {
+                console.log(err);
+              } else {
+              }
+            }
+          );
+        }
+        res.send(result);
+        // res.json({ success: 1, data: result });
+      } else {
+        db.query(
+          "DELETE FROM products WHERE id = ? and seller_id = ? ",
+          [id, id_boutique],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              if (pic1 !== "") {
+                fs.unlink(`${pic1}`, (err) => {
+                  if (err) {
+                    console.error(err);
+                    return;
+                  }
+                  //file removed
+                });
+              } else {
+                console.log("succes");
+                res.send("pic1 non trouver");
+              }
+              if (pic2 !== "") {
+                fs.unlink(`${pic2}`, (err) => {
+                  if (err) {
+                    console.error(err);
+                    return;
+                  }
+                  //file removed
+                });
+              } else {
+                // console.log("succes");
+                res.send("pic2 non trouver");
+              }
+              if (pic3 !== "") {
+                fs.unlink(`${pic3}`, (err) => {
+                  if (err) {
+                    console.error(err);
+                    return;
+                  }
+                  //file removed
+                });
+              } else {
+                // console.log("succes");
+                res.send("pic3 non trouver");
+              }
+              if (pic4 !== "") {
+                fs.unlink(`${pic4}`, (err) => {
+                  if (err) {
+                    console.error(err);
+                    return;
+                  }
+                  //file removed
+                });
+              } else {
+                // console.log("succes");
+                res.send("pic4 non trouver");
+              }
+              if (vid !== "") {
+                fs.unlink(`${vid}`, (err) => {
+                  if (err) {
+                    console.error(err);
+                    return;
+                  }
+                  //file removed
+                });
+              } else {
+                // console.log("succes");
+                res.send("vid non trouver");
+              }
+              // res.send("succes");
+              res.json({ success: 1, message: "succes" });
+            }
+          }
+        );
+      }
+    }
+  );
   //res.send(" "+id+"fgf");
 });
 
@@ -1187,29 +2608,100 @@ app.post("/approv3", (req, res) => {
     }
   );
 });
+app.post("/approv4", (req, res) => {
+  const stock = req.body.stock;
+  const product_id = req.body.product_id;
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "UPDATE products SET stock = ?  WHERE id = ? and seller_id = ?",
+    [stock, product_id, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("suc");
+      }
+    }
+  );
+});
+
+//mise à jour satut
+app.post("/majstatut", (req, res) => {
+  const invoice = req.body.invoice;
+  const stat = req.body.stat;
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "UPDATE command_validation SET status_id_command = ? WHERE invoice =? and seller_id = ?",
+    [stat, invoice, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        db.query(
+          "UPDATE commands SET status_id_command = ? WHERE invoice =? and seller_id = ?",
+          [stat, invoice, id_boutique],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              res.send("success");
+            }
+          }
+        );
+        // res.send("success");
+      }
+    }
+  );
+});
 
 app.post("/reducquant", (req, res) => {
-  const tail = req.body.tail;
-  const reduc = req.body.reduc;
+  const stock = req.body.stock;
+  const product_id = req.body.product_id;
   const id_boutique = req.body.id_boutique;
-  for (var i = 0; i < tail; i++) {
-    db.query(
-      "UPDATE products SET stock=?, total_sold= ?  WHERE id = ? and seller_id = ?",
-      [
-        reduc[i].stock - reduc[i].product_quantity,
-        reduc[i].total_sold + reduc[i].product_quantity,
-        reduc[i].product_id,
-        id_boutique,
-      ],
-      (err, result) => {
-        if (err) {
-          console.log(err);
-        } else {
-        }
+  const total_sold = req.body.total_sold;
+  const quantifiable_product = req.body.quantifiable_product;
+  const caisse = req.body.caisse;
+  db.query(
+    "UPDATE products SET stock = ?, total_sold = ?  WHERE id = ? and seller_id = ?",
+    [stock, total_sold, product_id, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        db.query(
+          "UPDATE caisse SET caisse = ? where id_boutique = ?",
+          [caisse, id_boutique],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              res.send("success");
+            }
+          }
+        );
       }
-    );
-  }
-  res.send("succs");
+    }
+  );
+});
+
+app.post("/addtresorerie", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  const last_caisse = req.body.last_caisse;
+  const end_caisse = req.body.end_caisse;
+  const montant = req.body.montant;
+  const type = req.body.type;
+  const invoice = req.body.invoice;
+  db.query(
+    "INSERT INTO tresorerie (id_boutique, last_caisse , end_caisse, montant, type, invoice) VALUES (?,?,?,?,?,?)",
+    [id_boutique, last_caisse, end_caisse, montant, type, invoice],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("succes");
+      }
+    }
+  );
 });
 
 app.get("/uploads/:name", function (req, res) {
@@ -1222,6 +2714,779 @@ app.post("/rej", (req, res) => {
   res.send(2);
 });
 
+app.post("/verif_create_acces", (req, res) => {
+  const id_compte = req.body.id_compte;
+  db.query(
+    "SELECT * FROM access WHERE id_compte = ?",
+    [id_compte],
+    (err, result) => {
+      if (result.length > 0) {
+        res.send("acces principal creer pour ce compte");
+      } else {
+        res.send("aucun acces creer pour ce compte");
+      }
+    }
+  );
+});
+app.post("/update_acces_principal", (req, res) => {
+  const id_compte = req.body.id_compte;
+  const acces_principal = req.body.acces_principal;
+  const code_acces_principal = req.body.code_acces_principal;
+  db.query(
+    "SELECT * FROM access WHERE id_compte = ?",
+    [id_compte],
+    (err, result) => {
+      if (result.length > 0) {
+        db.query(
+          "UPDATE access SET acces_principal = ?, code_acces_principal = ?  WHERE id_compte = ?",
+          [acces_principal, code_acces_principal, id_compte],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              res.send("suc");
+            }
+          }
+        );
+      } else {
+        db.query(
+          "INSERT INTO access (id_compte, acces_principal , code_acces_principal) VALUES (?,?,?)",
+          [id_compte, acces_principal, code_acces_principal],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              /* res.json({ind:i}); */
+              res.send("suc");
+            }
+          }
+        );
+      }
+    }
+  );
+});
+
+app.post("/add_acces_secondaire", (req, res) => {
+  const id_compte = req.body.id_compte;
+  const acces_secondaire = req.body.acces_secondaire;
+  const code_acces_secondaire = req.body.code_acces_secondaire;
+  db.query(
+    "INSERT INTO acces_secondaire (id_compte, acces_secondaire , code_acces_secondaire) VALUES (?,?,?)",
+    [id_compte, acces_secondaire, code_acces_secondaire],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        /* res.json({ind:i}); */
+        res.send("suc");
+      }
+    }
+  );
+});
+
+app.post("/update_acces_secondaire", (req, res) => {
+  const id_acces_secondaire = req.body.id_acces_secondaire;
+  const id_compte = req.body.id_compte;
+  const acces_secondaire = req.body.acces_secondaire;
+  const code_acces_secondaire = req.body.code_acces_secondaire;
+  db.query(
+    "UPDATE acces_secondaire SET acces_secondaire = ?, code_acces_secondaire = ?  WHERE id_compte = ? and id = ?",
+    [acces_secondaire, code_acces_secondaire, id_compte, id_acces_secondaire],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("suc");
+      }
+    }
+  );
+});
+/*** suppression d'acces secondaire ***/
+app.post("/delete_acces_secondaire", (req, res) => {
+  const id_acces_secondaire = req.body.id_acces_secondaire;
+  db.query(
+    "DELETE FROM  acces_secondaire WHERE id = ?",
+    [id_acces_secondaire],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("suc");
+      }
+    }
+  );
+});
+app.post("/getaccescompteprincipal", (req, res) => {
+  const id_compte = req.body.id_compte;
+  db.query(
+    "SELECT * FROM access where id_compte = ? ",
+    [id_compte],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+app.post("/getaccescomptesecondaire", (req, res) => {
+  const id_compte = req.body.id_compte;
+  db.query(
+    "SELECT * FROM acces_secondaire where id_compte = ? ",
+    [id_compte],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.post("/verifusername", (req, res) => {
+  const username = req.body.username;
+  db.query(
+    "SELECT * FROM compte WHERE username = ?",
+    username,
+    (err, result) => {
+      if (result.length > 0) {
+        res.json({
+          regist: false,
+          message: "Ce nom d'utilisateur existe déjà !",
+          data: result,
+        });
+      } else {
+        res.json({
+          regist: false,
+          message: "Ce nom d'utilisateur n'existe pas",
+        });
+      }
+    }
+  );
+});
+
+app.post("/updatepassword", (req, res) => {
+  const password = req.body.password;
+  const username = req.body.username;
+  bcrypt.hash(password, saltRounds, (err, hash) => {
+    if (err) {
+      console.log(err);
+    }
+
+    db.query(
+      "UPDATE compte SET password = ?  WHERE username = ?",
+      [hash, username],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          //  res.send("Values Inserted");
+          res.send("suc");
+        }
+      }
+    );
+  });
+});
+
+app.post("/licence_hash", (req, res) => {
+  const hash = req.body.hash;
+  /* const date_actu = req.body.date_actu */
+  db.query(
+    "insert into license(hash_code) values (?)",
+    [hash],
+    (err, result) => {
+      if (!err) {
+        res.send("success");
+      } else {
+        console.log(err);
+      }
+    }
+  );
+});
+
+//liste of hash
+app.get("/list_hash", (req, res) => {
+  const status = "NON ACTIF";
+  db.query(
+    "SELECT * FROM license where id_boutique = 0 and status_hash = ?",
+    status,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+//RECUP HEURE ACTUEL
+app.get("/date_time", (req, res) => {
+  db.query("SELECT NOW() as time_actu", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.post("/majhash", (req, res) => {
+  const id = req.body.id;
+  const date_start = req.body.date_start;
+  const date_end = req.body.date_end;
+  const status_hash = req.body.status_hash;
+  const id_boutique = req.body.id_boutique;
+  const validity = req.body.validity;
+  db.query(
+    "SELECT status_hash FROM license where id = ?",
+    [id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        if (result[0].status_hash === "ACTIF") {
+          res.send("deja");
+        } else if (result[0].status_hash === "NON ACTIF") {
+          db.query(
+            "UPDATE license SET status_hash = ?, id_boutique = ?, date_start = ?, date_end = ?, validity_time = ? WHERE id = ? ",
+            [status_hash, id_boutique, date_start, date_end, validity, id],
+            (err, result) => {
+              if (err) {
+                console.log(err);
+              } else {
+                res.send("success");
+              }
+            }
+          );
+        }
+      }
+    }
+  );
+});
+
+app.post("/onehash", (req, res) => {
+  const id = req.body.id;
+  const status_hash = "ACTIF";
+  let numRows = 0;
+  db.query(
+    "SELECT status_hash FROM license where id_boutique = ?",
+    [id, status_hash],
+    (err, result) => {
+      if (err) throw err;
+      numRows = result.length;
+      console.log(numRows);
+      if (numRows > 0) {
+        for (var i = 0; i < numRows; i++) {
+          if (result[i].status_hash === "ACTIF") {
+            //  res.send("il a un hash actif");
+            res.json({
+              message: "boutique a hash",
+            });
+            break;
+          }
+        }
+        res.json({ message: "boutique not hash" });
+        // res.send(`${numRows}`);
+      } else {
+        res.json({ message: "aucun hash atribuer" });
+      }
+    }
+  );
+});
+
+app.post("/exithash", (req, res) => {
+  const id = req.body.id;
+  let numRows = 0;
+  db.query(
+    "SELECT * FROM license where id_boutique = ?",
+    [id],
+    (err, result) => {
+      if (err) throw err;
+      numRows = result.length;
+      console.log(numRows);
+      if (numRows > 0) {
+        for (var i = 0; i < numRows; i++) {
+          if (result[i].status_hash === "ACTIF") {
+            //  res.send("il a un hash actif");
+            res.json({
+              id_actif: result[i].id,
+              date_start: result[i].date_start,
+              date_end: result[i].date_end,
+              message: "il a un hash actif",
+            });
+            break;
+          }
+        }
+        res.json({ message: "aucun hash actif" });
+        // res.send(`${numRows}`);
+      } else {
+        res.json({ message: "aucun hash atribuer" });
+      }
+    }
+  );
+});
+
+app.post("/majvalidhash", (req, res) => {
+  const id = req.body.id;
+  const status_hash = req.body.status_hash;
+  db.query(
+    "UPDATE license SET status_hash = ? WHERE id = ? ",
+    [status_hash, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.post("/majvalidity", (req, res) => {
+  const id = req.body.id;
+  const validity = req.body.validity;
+  db.query(
+    "UPDATE license SET validity_time = ? WHERE id = ? ",
+    [validity, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.post("/validityday", (req, res) => {
+  const id = req.body.id;
+  const validity = req.body.validity;
+  db.query(
+    "UPDATE license SET validity_time = ? WHERE id = ? ",
+    [validity, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.post("/profile_full", (req, res) => {
+  const id = req.body.id;
+  db.query(
+    "SELECT store_name, adress, description, website, facebook, whatsapp, boutiqueName, type_product, image, pays, email, id FROM sellers where id = ?",
+    [id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+app.post("/update_typeof_product", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  const type_product = req.body.type_product;
+  db.query(
+    "UPDATE sellers SET type_product = ? where id = ?",
+    [type_product, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.put("/majimgprofil/:id", async (req, res) => {
+  const id = req.params.id;
+  // const stat = req.params.stat;
+  // 'avatar' is the name of our file input field in the HTML form
+  let upload = multer({ storage: storage }).single("avatar");
+
+  upload(req, res, function (err) {
+    // req.file contains information of uploaded file
+    // req.body contains information of text fields
+
+    if (!req.file) {
+      return res.send("Please select an image to upload");
+    } else if (err instanceof multer.MulterError) {
+      return res.send(err);
+    } else if (err) {
+      return res.send(err);
+    }
+    let classifiedsadd = { image: req.file.filename };
+
+    //	const sql = "UPDATE products SET picture2 = ? WHERE id = 47";
+    const sql = "UPDATE sellers SET ? WHERE id = ?";
+    db.query(sql, [classifiedsadd, id], (err, results) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.json({ success: 1 });
+        //  res.send("suc");
+      }
+      //	res.json({ success: 1 }) ;
+      //   res.send(id+"");
+    });
+  });
+
+  //res.send(id+"");
+});
+
+app.post("/majprofile", (req, res) => {
+  const id = req.body.id;
+  const boutique = req.body.boutique;
+  const adress = req.body.adress;
+  const description = req.body.description;
+  const website = req.body.website;
+  const facebook = req.body.facebook;
+  const whatsapp = req.body.whatsapp;
+  db.query(
+    "UPDATE sellers SET store_name = ?, adress = ?, description = ?, website = ?, facebook = ?, whatsapp = ? where id = ?",
+    [boutique, adress, description, website, facebook, whatsapp, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+app.post("/majprofile1", (req, res) => {
+  const id = req.body.id;
+  const boutique = req.body.boutique;
+
+  db.query(
+    "UPDATE sellers SET store_name = ? where id = ?",
+    [boutique, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.post("/majprofile2", (req, res) => {
+  const id = req.body.id;
+  const adress = req.body.adress;
+
+  db.query(
+    "UPDATE sellers SET adress = ? where id = ?",
+    [adress, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+app.post("/majprofile3", (req, res) => {
+  const id = req.body.id;
+  const description = req.body.description;
+  db.query(
+    "UPDATE sellers SET description = ? where id = ?",
+    [description, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+app.post("/majprofile4", (req, res) => {
+  const id = req.body.id;
+  const website = req.body.website;
+  db.query(
+    "UPDATE sellers SET website = ? where id = ?",
+    [website, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+app.post("/majprofile5", (req, res) => {
+  const id = req.body.id;
+  const facebook = req.body.facebook;
+  db.query(
+    "UPDATE sellers SET facebook = ? where id = ?",
+    [facebook, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+app.post("/majprofile6", (req, res) => {
+  const id = req.body.id;
+  const whatsapp = req.body.whatsapp;
+  db.query(
+    "UPDATE sellers SET whatsapp = ? where id = ?",
+    [whatsapp, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.post("/majprofile7", (req, res) => {
+  const id = req.body.id;
+  const pays = req.body.pays;
+  db.query(
+    "UPDATE sellers SET pays = ? where id = ?",
+    [pays, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+app.get("/version", (req, res) => {
+  db.query("SELECT * FROM version", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+  // res.send(versionapp);
+});
+
+// recupe caisse value
+app.post("/caisse_val", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "SELECT * FROM caisse where id_boutique = ?",
+    id_boutique,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.post("/create_depense", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  const montant = req.body.montant;
+  const last_caisse = req.body.last_caisse;
+  const end_caisse = req.body.end_caisse;
+  const observation = req.body.observation;
+  /* const date_actu = req.body.date_actu */
+  db.query(
+    "insert into depense (id_boutique, montant, last_caisse, end_caisse, observation) values (?,?,?,?,?)",
+    [id_boutique, montant, last_caisse, end_caisse, observation],
+    (err, result) => {
+      if (!err) {
+        db.query(
+          "UPDATE caisse SET caisse = ? where id_boutique = ?",
+          [end_caisse, id_boutique],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              res.send("success");
+            }
+          }
+        );
+      } else {
+        console.log(err);
+      }
+    }
+  );
+});
+
+app.post("/create_decaissement", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  const numeros_compte = req.body.numeros_compte;
+  const montant = req.body.montant;
+  const last_caisse = req.body.last_caisse;
+  const end_caisse = req.body.end_caisse;
+  const observation = req.body.observation;
+  /* const date_actu = req.body.date_actu */
+  db.query(
+    "insert into decaissement (id_boutique, numero_compte, montant, last_caisse, end_caisse, observation) values (?,?,?,?,?,?)",
+    [
+      id_boutique,
+      numeros_compte,
+      montant,
+      last_caisse,
+      end_caisse,
+      observation,
+    ],
+    (err, result) => {
+      if (!err) {
+        db.query(
+          "UPDATE caisse SET caisse = ? where id_boutique = ?",
+          [end_caisse, id_boutique],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              res.send("success");
+            }
+          }
+        );
+      } else {
+        console.log(err);
+      }
+    }
+  );
+});
+
+app.post("/delete_depense", (req, res) => {
+  const id = req.body.id;
+  const id_boutique = req.body.id_boutique;
+  const montant = req.body.montant;
+  const last_caisse = req.body.last_caisse;
+  const end_caisse = req.body.end_caisse;
+  /* const date_actu = req.body.date_actu */
+  db.query(
+    "DELETE FROM depense WHERE id = ? and id_boutique = ?",
+    [id, id_boutique],
+    (err, result) => {
+      if (!err) {
+        db.query(
+          "UPDATE caisse SET caisse = ? where id_boutique = ?",
+          [end_caisse, id_boutique],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              res.send("success");
+            }
+          }
+        );
+      } else {
+        console.log(err);
+      }
+    }
+  );
+});
+
+app.post("/delete_decaissement", (req, res) => {
+  const id = req.body.id;
+  const id_boutique = req.body.id_boutique;
+  const montant = req.body.montant;
+  const last_caisse = req.body.last_caisse;
+  const end_caisse = req.body.end_caisse;
+  /* const date_actu = req.body.date_actu */
+  db.query(
+    "DELETE FROM decaissement WHERE id = ? and id_boutique = ?",
+    [id, id_boutique],
+    (err, result) => {
+      if (!err) {
+        db.query(
+          "UPDATE caisse SET caisse = ? where id_boutique = ?",
+          [end_caisse, id_boutique],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              res.send("success");
+            }
+          }
+        );
+      } else {
+        console.log(err);
+      }
+    }
+  );
+});
+// recupe caisse value
+app.post("/histo_depense", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "SELECT * FROM depense where id_boutique = ?",
+    id_boutique,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+// recupe caisse value
+app.post("/histo_decaissement", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "SELECT * FROM decaissement where id_boutique = ?",
+    id_boutique,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.post("/update_caisse", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  const caisse = req.body.caisse;
+  db.query(
+    "UPDATE caisse SET caisse = ? where id_boutique = ?",
+    [caisse, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.post("/update_caisse_post_commande", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  const caisse = req.body.caisse;
+  db.query(
+    "UPDATE caisse SET caisse = ? where id_boutique = ?",
+    [caisse, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
 //*************************************************      nelson     **********************************************************************
 
 /* obtenir la liste des produits */
@@ -1457,6 +3722,523 @@ app.put("/updatecommand", (req, res) => {
   );
 });
 
+app.post("/licence_hash", (req, res) => {
+  const hash = req.body.hash;
+  /* const date_actu = req.body.date_actu */
+  db.query(
+    "insert into license(hash_code) values (?)",
+    [hash],
+    (err, result) => {
+      if (!err) {
+        res.send("success");
+      } else {
+        console.log(err);
+      }
+    }
+  );
+});
+
+//liste of hash
+app.get("/list_hash", (req, res) => {
+  const status = "NON ACTIF";
+  db.query(
+    "SELECT * FROM license where id_boutique = 0 and status_hash = ?",
+    status,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+//RECUP HEURE ACTUEL
+app.get("/date_time", (req, res) => {
+  db.query("SELECT NOW() as time_actu", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.post("/majhash", (req, res) => {
+  const id = req.body.id;
+  const date_start = req.body.date_start;
+  const status_hash = req.body.status_hash;
+  const id_boutique = req.body.id_boutique;
+  const validity = req.body.validity;
+  db.query(
+    "SELECT status_hash FROM license where id = ?",
+    [id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        if (result[0].status_hash === "ACTIF") {
+          res.send("deja");
+        } else if (result[0].status_hash === "NON ACTIF") {
+          db.query(
+            "UPDATE license SET status_hash = ?, id_boutique = ?, date_start = ?, validity_time = ? WHERE id = ? ",
+            [status_hash, id_boutique, date_start, validity, id],
+            (err, result) => {
+              if (err) {
+                console.log(err);
+              } else {
+                res.send("success");
+              }
+            }
+          );
+        }
+      }
+    }
+  );
+});
+
+app.post("/onehash", (req, res) => {
+  const id = req.body.id;
+  const status_hash = "ACTIF";
+  let numRows = 0;
+  db.query(
+    "SELECT status_hash FROM license where id_boutique = ? and status_hash = ?",
+    [id, status_hash],
+    (err, result) => {
+      if (err) throw err;
+      numRows = result.length;
+      console.log(numRows);
+      if (numRows > 0) {
+        for (var i = 0; i < numRows; i++) {
+          if (result[i].status_hash === "ACTIF") {
+            //  res.send("il a un hash actif");
+            res.json({
+              message: "boutique a hash",
+            });
+            break;
+          }
+        }
+        res.json({ message: "boutique not hash" });
+        // res.send(`${numRows}`);
+      } else {
+        res.json({ message: "aucun hash atribuer" });
+      }
+    }
+  );
+});
+
+app.post("/exithash", (req, res) => {
+  const id = req.body.id;
+  let numRows = 0;
+  db.query(
+    "SELECT * FROM license where id_boutique = ?",
+    [id],
+    (err, result) => {
+      if (err) throw err;
+      numRows = result.length;
+      console.log(numRows);
+      if (numRows > 0) {
+        for (var i = 0; i < numRows; i++) {
+          if (result[i].status_hash === "ACTIF") {
+            //  res.send("il a un hash actif");
+            res.json({
+              id_actif: result[i].id,
+              date_start: result[i].date_start,
+              date_end: result[i].date_end,
+              message: "il a un hash actif",
+            });
+            break;
+          }
+        }
+        res.json({ message: "aucun hash actif" });
+        // res.send(`${numRows}`);
+      } else {
+        res.json({ message: "aucun hash atribuer" });
+      }
+    }
+  );
+});
+
+app.post("/majvalidhash", (req, res) => {
+  const id = req.body.id;
+  const status_hash = req.body.status_hash;
+  db.query(
+    "UPDATE license SET status_hash = ? WHERE id = ? ",
+    [status_hash, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.post("/majvalidity", (req, res) => {
+  const id = req.body.id;
+  const validity = req.body.validity;
+  db.query(
+    "UPDATE license SET validity_time = ? WHERE id = ? ",
+    [validity, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.post("/validityday", (req, res) => {
+  const id = req.body.id;
+  const validity = req.body.validity;
+  db.query(
+    "UPDATE license SET validity_time = ? WHERE id = ? ",
+    [validity, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.post("/profile_full", (req, res) => {
+  const id = req.body.id;
+  db.query(
+    "SELECT store_name, adress, description, website, facebook, whatsapp, boutiqueName, image, id FROM sellers where id = ?",
+    [id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.put("/majimgprofil/:id", async (req, res) => {
+  const id = req.params.id;
+  // const stat = req.params.stat;
+  // 'avatar' is the name of our file input field in the HTML form
+  let upload = multer({ storage: storage }).single("avatar");
+
+  upload(req, res, function (err) {
+    // req.file contains information of uploaded file
+    // req.body contains information of text fields
+
+    if (!req.file) {
+      return res.send("Please select an image to upload");
+    } else if (err instanceof multer.MulterError) {
+      return res.send(err);
+    } else if (err) {
+      return res.send(err);
+    }
+    let classifiedsadd = { image: req.file.filename };
+
+    //	const sql = "UPDATE products SET picture2 = ? WHERE id = 47";
+    const sql = "UPDATE sellers SET ? WHERE id = ?";
+    db.query(sql, [classifiedsadd, id], (err, results) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.json({ success: 1 });
+        //  res.send("suc");
+      }
+      //	res.json({ success: 1 }) ;
+      //   res.send(id+"");
+    });
+  });
+
+  //res.send(id+"");
+});
+
+app.post("/majprofile", (req, res) => {
+  const id = req.body.id;
+  const boutique = req.body.boutique;
+  const adress = req.body.adress;
+  const description = req.body.description;
+  const website = req.body.website;
+  const facebook = req.body.facebook;
+  const whatsapp = req.body.whatsapp;
+  db.query(
+    "UPDATE sellers SET store_name = ?, adress = ?, description = ?, website = ?, facebook = ?, whatsapp = ? where id = ?",
+    [boutique, adress, description, website, facebook, whatsapp, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+app.post("/majprofile1", (req, res) => {
+  const id = req.body.id;
+  const boutique = req.body.boutique;
+
+  db.query(
+    "UPDATE sellers SET store_name = ? where id = ?",
+    [boutique, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.post("/majprofile2", (req, res) => {
+  const id = req.body.id;
+  const adress = req.body.adress;
+
+  db.query(
+    "UPDATE sellers SET adress = ? where id = ?",
+    [adress, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+app.post("/majprofile3", (req, res) => {
+  const id = req.body.id;
+  const description = req.body.description;
+  db.query(
+    "UPDATE sellers SET description = ? where id = ?",
+    [description, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+app.post("/majprofile4", (req, res) => {
+  const id = req.body.id;
+  const website = req.body.website;
+  db.query(
+    "UPDATE sellers SET website = ? where id = ?",
+    [website, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+app.post("/majprofile5", (req, res) => {
+  const id = req.body.id;
+  const facebook = req.body.facebook;
+  db.query(
+    "UPDATE sellers SET facebook = ? where id = ?",
+    [facebook, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+app.post("/majprofile6", (req, res) => {
+  const id = req.body.id;
+  const whatsapp = req.body.whatsapp;
+  db.query(
+    "UPDATE sellers SET whatsapp = ? where id = ?",
+    [whatsapp, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.get("/versionapp", (req, res) => {
+  const versionapp = "1.0.0";
+  res.send(versionapp);
+});
+
+// recupe caisse value
+app.post("/caisse_val", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "SELECT * FROM caisse where id_boutique = ?",
+    id_boutique,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.post("/create_depense", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  const montant = req.body.montant;
+  const last_caisse = req.body.last_caisse;
+  const end_caisse = req.body.end_caisse;
+  const observation = req.body.observation;
+  /* const date_actu = req.body.date_actu */
+  db.query(
+    "insert into depense (id_boutique, montant, last_caisse, end_caisse, observation) values (?,?,?,?,?)",
+    [id_boutique, montant, last_caisse, end_caisse, observation],
+    (err, result) => {
+      if (!err) {
+        db.query(
+          "UPDATE caisse SET caisse = ? where id_boutique = ?",
+          [end_caisse, id_boutique],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              res.send("success");
+            }
+          }
+        );
+      } else {
+        console.log(err);
+      }
+    }
+  );
+});
+
+app.post("/create_decaissement", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  const numeros_compte = req.body.numeros_compte;
+  const montant = req.body.montant;
+  const last_caisse = req.body.last_caisse;
+  const end_caisse = req.body.end_caisse;
+  const observation = req.body.observation;
+  /* const date_actu = req.body.date_actu */
+  db.query(
+    "insert into decaissement (id_boutique, numero_compte, montant, last_caisse, end_caisse, observation) values (?,?,?,?,?,?)",
+    [
+      id_boutique,
+      numeros_compte,
+      montant,
+      last_caisse,
+      end_caisse,
+      observation,
+    ],
+    (err, result) => {
+      if (!err) {
+        db.query(
+          "UPDATE caisse SET caisse = ? where id_boutique = ?",
+          [end_caisse, id_boutique],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              res.send("success");
+            }
+          }
+        );
+      } else {
+        console.log(err);
+      }
+    }
+  );
+});
+// recupe caisse value
+app.post("/histo_depense", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "SELECT * FROM depense where id_boutique = ?",
+    id_boutique,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+// recupe caisse value
+app.post("/histo_decaissement", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "SELECT * FROM decaissement where id_boutique = ?",
+    id_boutique,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+// recupe histo tresorerie
+app.post("/histo_tresorerie", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  db.query(
+    "SELECT * FROM tresorerie where id_boutique = ?",
+    id_boutique,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.post("/update_caisse", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  const caisse = req.body.caisse;
+  db.query(
+    "UPDATE caisse SET caisse = ? where id_boutique = ?",
+    [caisse, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
+app.post("/update_caisse_post_commande", (req, res) => {
+  const id_boutique = req.body.id_boutique;
+  const caisse = req.body.caisse;
+  db.query(
+    "UPDATE caisse SET caisse = ? where id_boutique = ?",
+    [caisse, id_boutique],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("success");
+      }
+    }
+  );
+});
+
 //******************************************************     vital     *****************************************************************
 
 // REST API CURD
@@ -1623,7 +4405,7 @@ app.get("/invoicee", (req, res) => {
 app.get("/cherchernumfaclast", (req, res) => {
   // sql query
   let idmax;
-
+  let invoicer;
   db.query("SELECT MAX(id) AS TOTA FROM commands", (err, result) => {
     if (err) throw err;
     idmax = result[0].TOTA;
@@ -1641,6 +4423,8 @@ app.get("/cherchernumfaclast", (req, res) => {
 });
 
 app.get("/exitcont", (req, res) => {
+  let numRows;
+
   db.query("SELECT * FROM commands", (err, result) => {
     if (err) throw err;
     numRows = result.length;
@@ -1651,6 +4435,7 @@ app.get("/exitcont", (req, res) => {
 
 app.get("/nombrartpan", (req, res) => {
   let idmax;
+  let numRows;
   db.query("SELECT MAX(id) AS TOTA FROM commands ", (err, result) => {
     if (err) throw err;
     idmax = result[0].TOTA;
@@ -1685,6 +4470,7 @@ app.get("/nombrartpan", (req, res) => {
 app.post("/exitart", (req, res) => {
   const nfac = req.body.nfac;
   const product_name = req.body.product_name;
+  let numRows;
   db.query(
     "SELECT product_name FROM commands where invoice=? and product_name=?",
     [nfac, product_name],
@@ -1741,6 +4527,7 @@ app.post("/api/createe", (req, res) => {
 
 app.get("/recuppan", (req, res) => {
   let idmax;
+  let numRows;
   db.query("SELECT MAX(id) AS TOTA FROM commands ", (err, result) => {
     if (err) throw err;
     idmax = result[0].TOTA;
@@ -1788,6 +4575,7 @@ app.post("/nectar", (req, res) => {
 app.get("/totalprice", (req, res) => {
   let idmax;
   let total_price;
+  let numRows;
   db.query("SELECT MAX(id) AS TOTA FROM commands ", (err, result) => {
     if (err) throw err;
     idmax = result[0].TOTA;
@@ -1827,7 +4615,7 @@ app.get("/api/readingsim1", (req, res) => {
   // sql query
   let sql = `SELECT * FROM todotbl WHERE simchoice = ?`;
   // run query
-  db.query(sql, 0, (err, result) => {
+  db.query(sql, 1, (err, result) => {
     if (err) throw err;
     res.send(result);
   });
@@ -1838,7 +4626,7 @@ app.get("/api/readingsim2", (req, res) => {
   // sql query
   let sql = `SELECT * FROM todotbl WHERE simchoice = ?`;
   // run query
-  db.query(sql, 1, (err, result) => {
+  db.query(sql, 2, (err, result) => {
     if (err) throw err;
     res.send(result);
   });
@@ -2201,6 +4989,7 @@ app.put("/changestockappro", (req, res) => {
   let stockinit = 0;
   let quantcommand = 0;
   let stockupdate = 0;
+  let quantappro;
   db.query(
     "SELECT stock FROM products  WHERE id = ? ",
     id_product,
@@ -2556,56 +5345,10 @@ app.post("/afficheartcom", (req, res) => {
     }
   );
 });
-//mise à jour satut
-app.post("/majstatut", (req, res) => {
-  const invoice = req.body.invoice;
-  db.query(
-    "UPDATE command_validation SET statut = 1 WHERE invoice =? ",
-    invoice,
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("success");
-      }
-    }
-  );
-});
 
-app.post("/licence_hash", (req, res) => {
-  const hash = req.body.hash;
-  /* const date_actu = req.body.date_actu */
-  db.query(
-    "insert into license(hash_code) values (?)",
-    [hash],
-    (err, result) => {
-      if (!err) {
-        res.send("success");
-      } else {
-        console.log(err);
-      }
-    }
-  );
-});
-
-//liste of hash
-app.get("/list_hash", (req, res) => {
-  const status = "NON ACTIF";
-  db.query(
-    "SELECT * FROM license where id_boutique = 0 and status_hash = ?",
-    status,
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send(result);
-      }
-    }
-  );
-});
-//RECUP HEURE ACTUEL
-app.get("/date_time", (req, res) => {
-  db.query("SELECT NOW() as time_actu", (err, result) => {
+//liste des demandes de promotion
+app.get("/get_all_promotion", (req, res) => {
+  db.query("SELECT * FROM promotion", (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -2614,152 +5357,21 @@ app.get("/date_time", (req, res) => {
   });
 });
 
-app.post("/majhash", (req, res) => {
-  const id = req.body.id;
-  const date_start = req.body.date_start;
-  const status_hash = req.body.status_hash;
-  const id_boutique = req.body.id_boutique;
-  const validity = req.body.validity;
-  db.query(
-    "SELECT status_hash FROM license where id = ?",
-    [id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        if (result[0].status_hash === "ACTIF") {
-          res.send("deja");
-        } else if (result[0].status_hash === "NON ACTIF") {
-          db.query(
-            "UPDATE license SET status_hash = ?, id_boutique = ?, date_start = ?, validity_time = ? WHERE id = ? ",
-            [status_hash, id_boutique, date_start, validity, id],
-            (err, result) => {
-              if (err) {
-                console.log(err);
-              } else {
-                res.send("success");
-              }
-            }
-          );
-        }
-      }
+//liste des comptes des vendeurs
+app.get("/get_all_sellers_compte", (req, res) => {
+  db.query("SELECT id, username, email FROM compte", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
     }
-  );
+  });
 });
 
-app.post("/onehash", (req, res) => {
-  const id = req.body.id;
-  const status_hash = "ACTIF";
+//liste des licences des vendeurs
+app.get("/get_all_licences_compte", (req, res) => {
   db.query(
-    "SELECT status_hash FROM license where id_boutique = ? and status_hash = ?",
-    [id, status_hash],
-    (err, result) => {
-      if (err) throw err;
-      numRows = result.length;
-      console.log(numRows);
-      if (numRows > 0) {
-        for (var i = 0; i < numRows; i++) {
-          if (result[i].status_hash === "ACTIF") {
-            //  res.send("il a un hash actif");
-            res.json({
-              message: "boutique a hash",
-            });
-            break;
-          }
-        }
-        res.json({ message: "boutique not hash" });
-        // res.send(`${numRows}`);
-      } else {
-        res.json({ message: "aucun hash atribuer" });
-      }
-    }
-  );
-});
-
-app.post("/exithash", (req, res) => {
-  const id = req.body.id;
-  db.query(
-    "SELECT * FROM license where id_boutique = ?",
-    [id],
-    (err, result) => {
-      if (err) throw err;
-      numRows = result.length;
-      console.log(numRows);
-      if (numRows > 0) {
-        for (var i = 0; i < numRows; i++) {
-          if (result[i].status_hash === "ACTIF") {
-            //  res.send("il a un hash actif");
-            res.json({
-              id_actif: result[i].id,
-              date_start: result[i].date_start,
-              date_end: result[i].date_end,
-              message: "il a un hash actif",
-            });
-            break;
-          }
-        }
-        res.json({ message: "aucun hash actif" });
-        // res.send(`${numRows}`);
-      } else {
-        res.json({ message: "aucun hash atribuer" });
-      }
-    }
-  );
-});
-
-app.post("/majvalidhash", (req, res) => {
-  const id = req.body.id;
-  const status_hash = req.body.status_hash;
-  db.query(
-    "UPDATE license SET status_hash = ? WHERE id = ? ",
-    [status_hash, id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("success");
-      }
-    }
-  );
-});
-
-app.post("/majvalidity", (req, res) => {
-  const id = req.body.id;
-  const validity = req.body.validity;
-  db.query(
-    "UPDATE license SET validity_time = ? WHERE id = ? ",
-    [validity, id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("success");
-      }
-    }
-  );
-});
-
-app.post("/validityday", (req, res) => {
-  const id = req.body.id;
-  const validity = req.body.validity;
-  db.query(
-    "UPDATE license SET validity_time = ? WHERE id = ? ",
-    [validity, id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("success");
-      }
-    }
-  );
-});
-
-app.post("/profile_full", (req, res) => {
-  const id = req.body.id;
-  db.query(
-    "SELECT store_name, adress, description, website, facebook, whatsapp FROM sellers where id = ?",
-    [id],
+    "SELECT id, id_boutique, validity_time, status_hash FROM license WHERE id_boutique <> 0",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -2770,254 +5382,6 @@ app.post("/profile_full", (req, res) => {
   );
 });
 
-app.post("/majprofile", (req, res) => {
-  const id = req.body.id;
-  const boutique = req.body.boutique;
-  const adress = req.body.adress;
-  const description = req.body.description;
-  const website = req.body.website;
-  const facebook = req.body.facebook;
-  const whatsapp = req.body.whatsapp;
-  db.query(
-    "UPDATE sellers SET store_name = ?, adress = ?, description = ?, website = ?, facebook = ?, whatsapp = ? where id = ?",
-    [boutique, adress, description, website, facebook, whatsapp, id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("success");
-      }
-    }
-  );
-});
-app.post("/majprofile1", (req, res) => {
-  const id = req.body.id;
-  const boutique = req.body.boutique;
-
-  db.query(
-    "UPDATE sellers SET store_name = ? where id = ?",
-    [boutique, id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("success");
-      }
-    }
-  );
-});
-
-app.post("/majprofile2", (req, res) => {
-  const id = req.body.id;
-  const adress = req.body.adress;
-
-  db.query(
-    "UPDATE sellers SET adress = ? where id = ?",
-    [adress, id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("success");
-      }
-    }
-  );
-});
-app.post("/majprofile3", (req, res) => {
-  const id = req.body.id;
-  const description = req.body.description;
-  db.query(
-    "UPDATE sellers SET description = ? where id = ?",
-    [description, id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("success");
-      }
-    }
-  );
-});
-app.post("/majprofile4", (req, res) => {
-  const id = req.body.id;
-  const website = req.body.website;
-  db.query(
-    "UPDATE sellers SET website = ? where id = ?",
-    [website, id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("success");
-      }
-    }
-  );
-});
-app.post("/majprofile5", (req, res) => {
-  const id = req.body.id;
-  const facebook = req.body.facebook;
-  db.query(
-    "UPDATE sellers SET facebook = ? where id = ?",
-    [facebook, id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("success");
-      }
-    }
-  );
-});
-app.post("/majprofile6", (req, res) => {
-  const id = req.body.id;
-  const whatsapp = req.body.whatsapp;
-  db.query(
-    "UPDATE sellers SET whatsapp = ? where id = ?",
-    [whatsapp, id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("success");
-      }
-    }
-  );
-});
-
-app.get("/versionapp", (req, res) => {
-  const versionapp = "1.0.0";
-  res.send(versionapp);
-});
-
-// recupe caisse value
-app.post("/caisse_val", (req, res) => {
-  const id_boutique = req.body.id_boutique;
-  db.query(
-    "SELECT * FROM caisse where id_boutique = ?",
-    id_boutique,
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send(result);
-      }
-    }
-  );
-});
-
-app.post("/create_depense", (req, res) => {
-  const id_boutique = req.body.id_boutique;
-  const montant = req.body.montant;
-  const last_caisse = req.body.last_caisse;
-  const end_caisse = req.body.end_caisse;
-  const observation = req.body.observation;
-  /* const date_actu = req.body.date_actu */
-  db.query(
-    "insert into depense (id_boutique, montant, last_caisse, end_caisse, observation) values (?,?,?,?,?)",
-    [id_boutique, montant, last_caisse, end_caisse, observation],
-    (err, result) => {
-      if (!err) {
-        db.query(
-          "UPDATE caisse SET caisse = ? where id_boutique = ?",
-          [end_caisse, id_boutique],
-          (err, result) => {
-            if (err) {
-              console.log(err);
-            } else {
-              res.send("success");
-            }
-          }
-        );
-      } else {
-        console.log(err);
-      }
-    }
-  );
-});
-
-app.post("/create_decaissement", (req, res) => {
-  const id_boutique = req.body.id_boutique;
-  const numeros_compte = req.body.numeros_compte;
-  const montant = req.body.montant;
-  const last_caisse = req.body.last_caisse;
-  const end_caisse = req.body.end_caisse;
-  const observation = req.body.observation;
-  /* const date_actu = req.body.date_actu */
-  db.query(
-    "insert into decaissement (id_boutique, numero_compte, montant, last_caisse, end_caisse, observation) values (?,?,?,?,?,?)",
-    [
-      id_boutique,
-      numeros_compte,
-      montant,
-      last_caisse,
-      end_caisse,
-      observation,
-    ],
-    (err, result) => {
-      if (!err) {
-        db.query(
-          "UPDATE caisse SET caisse = ? where id_boutique = ?",
-          [end_caisse, id_boutique],
-          (err, result) => {
-            if (err) {
-              console.log(err);
-            } else {
-              res.send("success");
-            }
-          }
-        );
-      } else {
-        console.log(err);
-      }
-    }
-  );
-});
-// recupe caisse value
-app.post("/histo_depense", (req, res) => {
-  const id_boutique = req.body.id_boutique;
-  db.query(
-    "SELECT * FROM depense where id_boutique = ?",
-    id_boutique,
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send(result);
-      }
-    }
-  );
-});
-// recupe caisse value
-app.post("/histo_decaissement", (req, res) => {
-  const id_boutique = req.body.id_boutique;
-  db.query(
-    "SELECT * FROM decaissement where id_boutique = ?",
-    id_boutique,
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send(result);
-      }
-    }
-  );
-});
-
-app.post("/update_caisse", (req, res) => {
-  const id_boutique = req.body.id_boutique;
-  const caisse = req.body.caisse;
-  db.query(
-    "UPDATE caisse SET caisse = ? where id_boutique = ?",
-    [caisse, id_boutique],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("success");
-      }
-    }
-  );
-});
 // {/* -Fichier server qui se charge de gérer l'envoi des requêtes de recherche depuis le programme à la base de donnée créée
 // */}
 // const express = require('express');

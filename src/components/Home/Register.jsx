@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/jsx-no-target-blank */
 /* eslint-disable jsx-a11y/img-redundant-alt */
 /* eslint-disable react/jsx-pascal-case */
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   FaGithub,
   FaInstagram,
@@ -22,9 +23,11 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { setHash_code } from "../../Feature/HashSlice";
 import { informationCircle } from "ionicons/icons";
+import emailjs from "@emailjs/browser";
 
 const Register = () => {
   const [codeparrain, setcodeparrain] = useState("");
+  const [message, setmessage] = useState("dzdzdz");
   const [email, setemail] = useState("");
   const [ifcodeparrain, setIfcodeparrain] = useState(false);
   const [ifsupcode, setIfsupcode] = useState(false);
@@ -42,8 +45,10 @@ const Register = () => {
   const [type, settype] = useState("sellers");
   const [showLoading, setShowLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [progress, setprogress] = useState(false);
   let [hash, setHash] = useState(useSelector((state) => state.Hash.hash_user));
   const dispatch = useDispatch();
+  const form = useRef();
 
   const reg = () => {
     if (!username) {
@@ -96,10 +101,11 @@ const Register = () => {
       setIfemailval(false);
       if (username && password && password_confirm) {
         if (password === password_confirm) {
-          setShowLoading(true);
+          // setShowLoading(true);
+          setprogress(true);
           const parraincode = makeid(5) + username + makeid(5);
           console.log(parraincode);
-          Axios.post("https://backend-shop.benindigital.com/register", {
+          Axios.post("https://backendtrader.digitalfirst.space/register", {
             username: username,
             password: password,
             code_parrain: parraincode,
@@ -111,6 +117,7 @@ const Register = () => {
                 // if(response.data.error === "L'utilisateur n'existe pas"){
                 setShowLoading(false);
                 setIfUsernameExist(true);
+                setprogress(false);
                 setTimeout(() => {
                   setIfUsernameExist(false);
                 }, [5000]);
@@ -119,20 +126,17 @@ const Register = () => {
                 // if(response.data.error === "L'utilisateur n'existe pas"){
                 setShowLoading(false);
                 setIfcodeExist(true);
+                setprogress(false);
+
                 setTimeout(() => {
                   setIfcodeExist(false);
                 }, [5000]);
               }
             } else {
               // console.log("Succès");
-              setShowLoading(false);
-              setShowToast(true);
-              setusername("");
-              setpassword("");
-              setpassword_confirm("");
-              setemail("");
-              setcodeparrain("");
-              envoiemail();
+              sendEmail();
+              // envoiemail1();
+              // envoiemail();
               // setTimeout(() => {
               //   window.location.href="/logt"
               // }, [6000]);
@@ -140,6 +144,7 @@ const Register = () => {
           });
         } else {
           setIfpasscomfrom(true);
+          setprogress(false);
           setTimeout(() => {
             setIfpasscomfrom(false);
           }, [4000]);
@@ -147,6 +152,8 @@ const Register = () => {
       }
     } else {
       setIfemailval(true);
+      setprogress(false);
+
       setTimeout(() => {
         setIfemailval(false);
       }, [4000]);
@@ -154,14 +161,19 @@ const Register = () => {
     // }
   };
   const aleatoire_hash = () => {
-    var randomNumber = Math.floor(Math.random() * hash.length);
-    // console.log(datahash[randomNumber].hash_code);
-    const result = hash[randomNumber].hash_code;
-    return result;
+    if (hash[0]) {
+      var randomNumber = Math.floor(Math.random() * hash.length);
+      // console.log(datahash[randomNumber].hash_code);
+      const result = hash[randomNumber].hash_code;
+
+      return result;
+    } else {
+      recupe_hash();
+    }
   };
   const recupe_hash = () => {
     try {
-      fetch("https://backend-shop.benindigital.com/list_hash")
+      fetch("https://backendtrader.digitalfirst.space/list_hash")
         .then((res) => {
           const data = res.json();
           return data;
@@ -173,19 +185,101 @@ const Register = () => {
         });
     } catch (e) {}
   };
+  const initialise_acces = () => {
+    try {
+      fetch("https://backendtrader.digitalfirst.space/initialse_access")
+        .then((res) => {
+          const data = res.json();
+          return data;
+        })
+        .then((data) => {
+          console.log(data.length);
+        });
+    } catch (e) {}
+  };
   const subject = "Votre licence Digital Trader";
-  const body = `Le code de votre licence est : ${aleatoire_hash()}`;
+  const body = `${aleatoire_hash()}`;
+  // const body = `Le code de votre licence est : ${aleatoire_hash()}`;
+
   // const body = `Votre Licence est :`;
 
+  const sendEmail = () => {
+    // e.preventDefault();
+    emailjs
+      .sendForm(
+        "service_8ban597",
+        "template_n7b1nuj",
+        form.current,
+        // {
+        //   name: "fati",
+        //   email: "africaversatile@gmail.com",
+        //   message: "je suis ton pire cauchemar",
+        // },
+        "user_PCLS04dz1sYWS0FeEByct"
+      )
+      .then(
+        (result) => {
+          setShowLoading(false);
+          setShowToast(true);
+          setusername("");
+          setpassword("");
+          setpassword_confirm("");
+          setemail("");
+          setcodeparrain("");
+          setprogress(false);
+          initialise_acces();
+          // setTimeout(() => {
+          //   form.current.reset();
+          //   setprogress(false);
+          //   // setprogress1(true);
+          //   toast.success("Message envoyer avec succes");
+          //   setmessage("");
+          //   setname("");
+          //   setemail("");
+          // }, 2000);
+        },
+        (error) => {
+          console.log(error.text);
+          // setprogress(false);
+          // toast.error("ça c'est mal passer");
+          alert("ça c'est mal passer");
+        }
+      );
+  };
   const envoiemail = () => {
     Axios.get(
-      "https://backend-shop.benindigital.com/sendmail/sendMail.php?email=" +
+      "https://backendtrader.digitalfirst.space/sendmail/sendMail.php?email=" +
         email +
         "&body=" +
         body +
         "&subject=" +
         subject
     );
+  };
+  const envoiemail1 = () => {
+    // Faites une requête POST à votre API backend PHP
+    // Création de l'objet de données
+    const data = {
+      to: email,
+      subject: subject,
+      message: body,
+    };
+
+    fetch("http://localhost:3005/sendEmailtest", {
+      // fetch("https://backendtrader.digitalfirst.space/sendmail/sendMail1.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => response.text())
+      .then((data) => {
+        console.log(data); // Réponse de l'API backend
+      })
+      .catch((error) => {
+        console.error("Erreur:", error);
+      });
   };
 
   const makeid = (length) => {
@@ -221,7 +315,7 @@ const Register = () => {
         duration={7000}
         position="top"
       /> */}
-       <IonToast
+      <IonToast
         isOpen={showToast}
         onDidDismiss={() => setShowToast(false)}
         message="Votre compte a été créé avec succès. Vous recevrez un code par mail, pour la configuration de votre boutique"
@@ -232,7 +326,7 @@ const Register = () => {
             text: "OK",
             // role: "cancel",
             handler: () => {
-             window.location.href = "/logt"
+              window.location.href = "/logt";
             },
           },
         ]}
@@ -263,7 +357,7 @@ const Register = () => {
                     </h1>
                   </div>
 
-                  <label class=" text-sm">
+                  <label class="text-sm">
                     {/* <span class="text-gray-700 dark:text-gray-400">
                       Username
                     </span> */}
@@ -279,26 +373,52 @@ const Register = () => {
                       Veuillez entrez votre nom d'utilisateur!
                     </div>
                   )}
-                  <label class="mt-4 text-sm">
-                    {/* <span class="text-gray-700 dark:text-gray-400">Email</span> */}
-                    <IonInput
-                      className="w-full mt-1 h-10 text-sm border-2 border-color bg-white rounded-md p-2 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple form-input"
-                      placeholder="Votre adresse email"
-                      type="email"
-                      value={email}
-                      onIonChange={(e) => setemail(e.target.value)}
-                    />
-                  </label>
-                  {ifemail && (
-                    <div className="empty_full">
-                      Veuillez entrez votre email!
-                    </div>
-                  )}
-                  {ifemailval && (
-                    <div className="empty_full">
-                      Veuillez entrez un email au bon format!
-                    </div>
-                  )}
+                  <div className="w-full">
+                    <form ref={form} className="w-[100%]">
+                      <label class="mt-4 text-sm w-[100%]">
+                        {/* <span class="text-gray-700 dark:text-gray-400">Email</span> */}
+                        <IonInput
+                          className="w-full mt-1 h-10 text-sm border-2 border-color bg-white rounded-md p-2 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple form-input"
+                          placeholder="Votre adresse email"
+                          type="email"
+                          name="email"
+                          value={email}
+                          onIonChange={(e) => setemail(e.target.value)}
+                        />
+                      </label>
+                      {ifemail && (
+                        <div className="empty_full">
+                          Veuillez entrez votre email!
+                        </div>
+                      )}
+                      {ifemailval && (
+                        <div className="empty_full">
+                          Veuillez entrez un email au bon format!
+                        </div>
+                      )}
+                      <label class="mt-4 text-sm w-[100%] hidden">
+                        {/* <span class="text-gray-700 dark:text-gray-400">Email</span> */}
+                        <IonInput
+                          className="w-full mt-1 h-10 text-sm border-2 border-color bg-white rounded-md p-2 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple form-input"
+                          placeholder=""
+                          name="message"
+                          type="text"
+                          value={body}
+                        />
+                      </label>
+                      <label class="mt-4 text-sm w-[100%] hidden">
+                        {/* <span class="text-gray-700 dark:text-gray-400">Email</span> */}
+                        <IonInput
+                          className="w-full mt-1 h-10 text-sm border-2 border-color bg-white rounded-md p-2 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple form-input"
+                          placeholder=""
+                          name="name"
+                          type="text"
+                          value={"name"}
+                        />
+                      </label>
+                    </form>
+                  </div>
+
                   <label class="mt-4 text-sm">
                     {/* <span class="text-gray-700 dark:text-gray-400">
                       Password
@@ -389,12 +509,70 @@ const Register = () => {
                 >
                   Create account
                 </Link> */}
-                  <a
-                    class="block w-full no-underline px-4 py-2 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-deep_sky_blue border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
-                    onClick={reg}
-                  >
-                   Enregistrer
-                  </a>
+                  {progress ? (
+                    <div className="w-full flex items-center justify-center ">
+                      <svg
+                      class="pl"
+                      width="240"
+                      height="240"
+                      viewBox="0 0 240 240"
+                    >
+                      <circle
+                        class="pl__ring pl__ring--a"
+                        cx="120"
+                        cy="120"
+                        r="105"
+                        fill="none"
+                        stroke="#000"
+                        stroke-width="20"
+                        stroke-dasharray="0 660"
+                        stroke-dashoffset="-330"
+                        stroke-linecap="round"
+                      ></circle>
+                      <circle
+                        class="pl__ring pl__ring--b"
+                        cx="120"
+                        cy="120"
+                        r="35"
+                        fill="none"
+                        stroke="#000"
+                        stroke-width="20"
+                        stroke-dasharray="0 220"
+                        stroke-dashoffset="-110"
+                        stroke-linecap="round"
+                      ></circle>
+                      <circle
+                        class="pl__ring pl__ring--c"
+                        cx="85"
+                        cy="120"
+                        r="70"
+                        fill="none"
+                        stroke="#000"
+                        stroke-width="20"
+                        stroke-dasharray="0 440"
+                        stroke-linecap="round"
+                      ></circle>
+                      <circle
+                        class="pl__ring pl__ring--d"
+                        cx="155"
+                        cy="120"
+                        r="70"
+                        fill="none"
+                        stroke="#000"
+                        stroke-width="20"
+                        stroke-dasharray="0 440"
+                        stroke-linecap="round"
+                      ></circle>
+                    </svg>
+                    </div>
+                  ) : (
+                    <a
+                      class="block cursor-pointer w-full no-underline px-4 py-2 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-deep_sky_blue border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+                      onClick={reg}
+                    >
+                      Enregistrer
+                    </a>
+                  )}
 
                   <hr class="my-8" />
 
@@ -410,7 +588,8 @@ const Register = () => {
                       class="text-sm font-medium no-underline text-deep_sky_blue dark:text-purple-400 hover:underline"
                       to={"/logt"}
                     >
-                      Si vous avez un déjà compte,cliquez ici pour vous connecter
+                      Si vous avez déjà un compte,cliquez ici pour vous
+                      connecter
                     </Link>
                   </p>
                 </div>

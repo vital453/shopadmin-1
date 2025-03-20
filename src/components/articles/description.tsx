@@ -38,6 +38,7 @@ const Description: React.FC<Ajout_utiliformprops> = ({ Id, }) => {
     const [picture2, setPicture2] = useState<any>();
     const [picture3, setPicture3] = useState<any>();
     const [picture4, setPicture4] = useState<any>();
+    const [quantifiable_product, setquantifiable_product] = useState<any>();
     const [video, setVideo] = useState<any>();
     const [, setAdresse] = useState("");
     let [antecedants, setAntecedants] = useState(" ");
@@ -57,23 +58,24 @@ const Description: React.FC<Ajout_utiliformprops> = ({ Id, }) => {
 
 
     const getart = () => {
-        Axios.post('https://backend-shop.benindigital.com/recupart', {
+
+        Axios.post('https://backendtrader.digitalfirst.space/recupart', {
             id: idant,
-            id_boutique: userid.userId,
+            id_boutique: userid.BoutiqueId,
         }).then((ret) => {
             setArticle(ret.data);
-            console.log(ret.data);
-            setStock(ret.data[0].stock)
-            setIdcategorie(ret.data[0].idClinique)
-            setNom(ret.data[0].name)
-            setPrix(ret.data[0].price)
-            setDescription(ret.data[0].description)
-            setPicture1(ret.data[0].picture1)
-            setPicture2(ret.data[0].picture2)
-            setPicture3(ret.data[0].picture3)
-            setPicture4(ret.data[0].picture4)
-            setVideo(ret.data[0].video)
-            setStock(ret.data[0].stock)
+            // console.log(ret.data);
+            setStock(ret.data[0].stock);
+            setNom(ret.data[0].name);
+            setPrix(ret.data[0].price);
+            setDescription(ret.data[0].description);
+            setPicture1(ret.data[0].picture1);
+            setPicture2(ret.data[0].picture2);
+            setPicture3(ret.data[0].picture3);
+            setPicture4(ret.data[0].picture4);
+            setVideo(ret.data[0].video);
+            setStock(ret.data[0].stock);
+            setquantifiable_product(ret.data[0].quantifiable_product);
             
             
         })
@@ -111,7 +113,7 @@ const Description: React.FC<Ajout_utiliformprops> = ({ Id, }) => {
         }
 
 
-        // Axios.post('https://backend-shop.benindigital.com/ajoutpanier', {
+        // Axios.post('https://backendtrader.digitalfirst.space/ajoutpanier', {
         //         product_quantity: parseInt (quantite),
         //         product_name: nom,
         //         unite_price: parseInt (prix),
@@ -196,22 +198,22 @@ const Description: React.FC<Ajout_utiliformprops> = ({ Id, }) => {
                     <div className='newdiv'>
                         <Swiper spaceBetween={30} pagination={{ clickable: true, }} modules={[Pagination]} className="">
                             {(picture1) ? (
-                                <SwiperSlide><img src={`https://backend-shop.benindigital.com/${picture1}`} alt="card" className="imdet" /></SwiperSlide>
+                                <SwiperSlide><img src={`https://backendtrader.digitalfirst.space/${picture1}`} alt="card" className="imdet" /></SwiperSlide>
                             ) : (
                                 null
                             )}
                             {(picture2) ? (
-                                <SwiperSlide><img src={`https://backend-shop.benindigital.com/${picture2}`} alt="card" className="imdet" /></SwiperSlide>
+                                <SwiperSlide><img src={`https://backendtrader.digitalfirst.space/${picture2}`} alt="card" className="imdet" /></SwiperSlide>
                             ) : (
                                 null
                             )}
                             {(picture3) ? (
-                                <SwiperSlide><img src={`https://backend-shop.benindigital.com/${picture3}`} alt="card" className="imdet" /></SwiperSlide>
+                                <SwiperSlide><img src={`https://backendtrader.digitalfirst.space/${picture3}`} alt="card" className="imdet" /></SwiperSlide>
                             ) : (
                                 null
                             )}
                             {(picture4) ? (
-                                <SwiperSlide><img src={`https://backend-shop.benindigital.com/${picture4}`} alt="card" className="imdet" /></SwiperSlide>
+                                <SwiperSlide><img src={`https://backendtrader.digitalfirst.space/${picture4}`} alt="card" className="imdet" /></SwiperSlide>
                             ) : (
                                 null
                             )}
@@ -236,10 +238,10 @@ const Description: React.FC<Ajout_utiliformprops> = ({ Id, }) => {
                     <IonItem className='ion-margin-top nereide'>
                         <IonGrid>
                             <IonRow >
-                                Quantité disponible :
-                                {stock}
+                                Quantité disponible : &nbsp; &nbsp;
+                                {quantifiable_product === "oui" ? stock : "null"}
                             </IonRow>
-                            <IonRow >
+                            {/* <IonRow >
                                 <IonCol className='ion-text-center lab' >
                                     Quantité :
                                 </IonCol>
@@ -259,20 +261,20 @@ const Description: React.FC<Ajout_utiliformprops> = ({ Id, }) => {
                                         </IonFabButton>
                                     </IonItem>
                                 </IonCol>
-                            </IonRow>
+                            </IonRow> */}
                         </IonGrid>
                     </IonItem>
-                    <IonItem lines='none' className='ion-margin'>
+                    {/* <IonItem lines='none' className='ion-margin'>
                         <IonButton color='secondary' slot='end' size='small' onClick={() => { ajout() }}>Ajouter au panier
                             <IonIcon icon={cart} /></IonButton>
-                    </IonItem>
+                    </IonItem> */}
 
                     <IonModal
                         isOpen={showmodal}
                         onDidDismiss={() => { setShowmodal(false) }}
                         id="example-modal">
                         <video controls height='200' className='vid'>
-                            <source src={`https://backend-shop.benindigital.com/${video}`} />
+                            <source src={`https://backendtrader.digitalfirst.space/${video}`} />
                         </video>
                     </IonModal>
                     <IonToast

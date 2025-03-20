@@ -1,3 +1,4 @@
+/* eslint-disable no-lone-blocks */
 import { CreateAnimation, IonActionSheet, IonApp, IonBadge, IonProgressBar, IonButton, IonButtons, IonCol, IonContent, IonHeader, IonIcon, IonImg, IonInput, IonLabel, IonMenuButton, IonRefresher, IonRefresherContent, IonRippleEffect, IonRow, IonSegment, IonSegmentButton, IonSpinner, IonTitle, IonToast, IonToolbar } from '@ionic/react';
 import React, { useState, useEffect } from 'react';
 import { RefresherEventDetail } from '@ionic/core';
@@ -45,7 +46,7 @@ const Approv: React.SFC<Ajout_utiliformprops> = ({ id, stock }) => {
 
     const supprimer = () => {
         console.log(id);
-        axios.post('https://backend-shop.benindigital.com/supprart', {
+        axios.post('https://backendtrader.digitalfirst.space/supprart', {
             id: id,
             quantite: augment,
         }).then((ret) => {
@@ -71,7 +72,7 @@ const Approv: React.SFC<Ajout_utiliformprops> = ({ id, stock }) => {
         
     };
     const trans = () => {
-        axios.post('https://backend-shop.benindigital.com/approv', {
+        axios.post('https://backendtrader.digitalfirst.space/approv', {
             id: id,
             quantite: parseInt(augment)+stock,
         }).then((ret) => {

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/jsx-no-target-blank */
 /* eslint-disable jsx-a11y/img-redundant-alt */
 /* eslint-disable react/jsx-pascal-case */
@@ -93,7 +94,7 @@ const Profile = () => {
 
     if (Boutik && Descip && Whatsapp) {
       setShowLoading(true);
-      Axios.post("https://backend-shop.benindigital.com/majprofile", {
+      Axios.post("https://backendtrader.digitalfirst.space/majprofile", {
         id: JSON.parse(localStorage.getItem("user") + "").userId,
         boutique: Boutik,
         adress: Adress,
@@ -145,7 +146,7 @@ const Profile = () => {
     // console.log(store_name+"ets"+adress+"eta"+description+"etd"+website+"etwe"+facebook+"etf"+whatsapp+"etwha");
     setTimeout(() => {
       setShowLoading(true);
-      Axios.post("https://backend-shop.benindigital.com/majprofile", {
+      Axios.post("https://backendtrader.digitalfirst.space/majprofile", {
         id: JSON.parse(localStorage.getItem("user") + "").userId,
         boutique:
           tabprofile[0].store_name === "" ? Boutik : tabprofile[0].store_name,
@@ -164,7 +165,7 @@ const Profile = () => {
   };
   const profile_full = () => {
     try {
-      Axios.post("https://backend-shop.benindigital.com/profile_full", {
+      Axios.post("https://backendtrader.digitalfirst.space/profile_full", {
         id: JSON.parse(localStorage.getItem("user") + "").userId,
       }).then((ret) => {
         console.log(ret.data);

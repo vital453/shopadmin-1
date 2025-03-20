@@ -6,12 +6,15 @@ export const HashSlice = createSlice({
     hash_user: [],
     date_actu: "",
     website: "",
+    email: "",
     adress: "",
+    pays: "",
     description: "",
     facebook: "",
     store_name: "",
     code_boutique: "",
     whatsapp: "",
+    type_product: "",
     image: "",
     pass_acces: "",
     click1: false,
@@ -20,8 +23,13 @@ export const HashSlice = createSlice({
     click4: false,
     click5: false,
     click6: false,
+    click7: false,
     boutiquecompte: [],
     accesparcompte: [],
+    accescompteprincipal: [],
+    accescomptesecondaire: [],
+    choiceacces: "",
+    code_identifaction: "",
     badge: 0,
   },
   reducers: {
@@ -33,14 +41,25 @@ export const HashSlice = createSlice({
       state.boutiquecompte = payload;
     },
     setBadge: (state, { payload }) => {
-      state.badge = payload;
-      localStorage.setItem("badge", payload);
+      if (payload) {
+        state.badge = payload;
+        localStorage.setItem("badge", payload);
+      } else {
+        state.badge = 0;
+        localStorage.setItem("badge", 0);
+      }
     },
     setPassacces: (state, { payload }) => {
       state.pass_acces = payload;
     },
     setaccesparcompte: (state, { payload }) => {
       state.accesparcompte = payload;
+    },
+    setaccescompteprincipal: (state, { payload }) => {
+      state.accescompteprincipal = payload;
+    },
+    setaccescomptesecondaire: (state, { payload }) => {
+      state.accescomptesecondaire = payload;
     },
     setdate: (state, { payload }) => {
       state.date_actu = payload;
@@ -54,6 +73,10 @@ export const HashSlice = createSlice({
       state.adress = payload;
       localStorage.setItem("adress", JSON.stringify(payload));
     },
+    setpays: (state, { payload }) => {
+      state.pays = payload;
+      localStorage.setItem("pays", JSON.stringify(payload));
+    },
     setdescription: (state, { payload }) => {
       state.description = payload;
       localStorage.setItem("description", JSON.stringify(payload));
@@ -61,6 +84,10 @@ export const HashSlice = createSlice({
     setfacebook: (state, { payload }) => {
       state.facebook = payload;
       localStorage.setItem("facebook", JSON.stringify(payload));
+    },
+    setemail: (state, { payload }) => {
+      state.email = payload;
+      localStorage.setItem("email", JSON.stringify(payload));
     },
     setstore_name: (state, { payload }) => {
       state.store_name = payload;
@@ -77,6 +104,10 @@ export const HashSlice = createSlice({
     setimageprofil: (state, { payload }) => {
       state.image = payload;
       localStorage.setItem("image", JSON.stringify(payload));
+    },
+    settype_product: (state, { payload }) => {
+      state.type_product = payload;
+      localStorage.setItem("type_product", JSON.stringify(payload));
     },
     setclik1: (state, { payload }) => {
       state.click1 = payload;
@@ -96,7 +127,16 @@ export const HashSlice = createSlice({
     setclik6: (state, { payload }) => {
       state.click6 = payload;
     },
-    
+    setclik7: (state, { payload }) => {
+      state.click7 = payload;
+    },
+    setchoiceacces: (state, { payload }) => {
+      state.choiceacces = payload;
+      localStorage.setItem("choiceacces", payload);
+    },
+    setcode_identifaction: (state, { payload }) => {
+      state.code_identifaction = payload;
+    },
   },
 });
 
@@ -106,18 +146,26 @@ export const {
   setadress,
   setdescription,
   setfacebook,
+  setpays,
   setstore_name,
   setwebsite,
   setwhatsapp,
+  settype_product,
   setclik1,
   setclik2,
   setclik3,
   setclik4,
   setclik5,
   setclik6,
+  setclik7,
   setBoutiquecompte,
   setBadge,
   setPassacces,
   setaccesparcompte,
+  setaccescompteprincipal,
+  setaccescomptesecondaire,
+  setchoiceacces,
+  setcode_identifaction,
+  setemail,
 } = HashSlice.actions;
 export default HashSlice.reducer;

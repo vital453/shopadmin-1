@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
 import {
   IonApp,
@@ -109,6 +110,10 @@ export const Approvisionnement: React.SFC<Ajout_utiliformprops> = ({}) => {
   const boutiqueid = useSelector((state: any) => state.auth.user);
   const accesparcompte = useSelector((state: any) => state.Hash.accesparcompte);
 
+  const [width, setWindowWidth] = useState(window.innerWidth);
+
+  const [searchText, setSearchText] = useState("");
+
   const loadData = (ev: any) => {
     setTimeout(() => {
       setNub(nub + 10);
@@ -117,7 +122,7 @@ export const Approvisionnement: React.SFC<Ajout_utiliformprops> = ({}) => {
   };
 
   const getcom = () => {
-    // fetch('https://backend-shop.benindigital.com/affichecommande').then((res) => {
+    // fetch('https://backendtrader.digitalfirst.space/affichecommande').then((res) => {
     //     const data = res.json()
     //     return data
     // }).then((data) => {
@@ -138,124 +143,265 @@ export const Approvisionnement: React.SFC<Ajout_utiliformprops> = ({}) => {
     setquant_appro(a);
     setPrixt(s);
     setprev_quant(t);
+    setShowmodal(true);
+  };
+
+  const updateDimensions = () => {
+    // const width = window.innerWidth;
+    setWindowWidth(window.innerWidth);
   };
 
   useEffect(() => {
     // getcom();
     console.log(approv);
   }, []);
+  window.addEventListener("resize", updateDimensions);
   return (
+    // <>
+    //   {width < 500 ? (
+    //     <>
+    //       {approv[0] ? (
+    //         <>
+    //           {approv.slice(0, nub).map((card: any, index: any) => {
+    //             return (
+    //               <IonItem
+    //                 className=" Itemsv"
+    //                 onClick={() => {
+    //                   setShowmodal(true);
+    //                   // setId(val.idPatient);
+    //                   permu(
+    //                     card.date,
+    //                     card.product_name,
+    //                     card.stock_appro,
+    //                     card.total_price,
+    //                     card.stock_preview
+    //                   );
+    //                 }}
+    //               >
+    //                 <IonLabel>
+    //                   <h3 className="nereide">
+    //                     <span className="adddate">
+    //                       {/* {String(new Date(card.date)).split("(")[0]} */}
+    //                       {card.date.split("T")[0]} &nbsp; à &nbsp;{" "}
+    //                       {card.date.split("T")[1].split(".")[0]}
+    //                     </span>{" "}
+    //                     {/* <span className="add2">{card.invoice}</span>{" "} */}
+    //                   </h3>
+    //                   <p className=" add3">
+    //                     {card.total_price < 0 ? (
+    //                       <>
+    //                         <span className="text-purple-700">
+    //                           Sortie hors vente:{" "}
+    //                         </span>
+    //                         <span className="add5">
+    //                           {new Intl.NumberFormat("de-DE", {
+    //                             style: "currency",
+    //                             currency: "XOF",
+    //                           }).format(card.total_price)}
+    //                         </span>
+    //                       </>
+    //                     ) : (
+    //                       <>
+    //                         <span className="add4">Approvisionnement: </span>
+    //                         <span className="add5">
+    //                           {new Intl.NumberFormat("de-DE", {
+    //                             style: "currency",
+    //                             currency: "XOF",
+    //                           }).format(card.total_price)}
+    //                         </span>
+    //                       </>
+    //                     )}
+    //                   </p>
+    //                 </IonLabel>
+    //               </IonItem>
+    //             );
+    //           })}
+    //           <IonInfiniteScroll
+    //             className="scroll1"
+    //             onIonInfinite={loadData}
+    //             threshold="100px"
+    //             disabled={isInfiniteDisabled}
+    //           >
+    //             <IonInfiniteScrollContent
+    //               loadingSpinner="lines-sharp-small"
+    //               loadingText="Chargement de données..."
+    //             ></IonInfiniteScrollContent>
+    //           </IonInfiniteScroll>
+    //         </>
+    //       ) : (
+    //         <>
+    //           <div className="items-center justify-center text-center mb-3">
+    //             <img className="" src="delai-de-traitement.png" alt="d" />
+    //             <h2 className="items-center justify-center text-center ">
+    //               aucun approvisionnement
+    //             </h2>
+    //           </div>
+    //         </>
+    //       )}
+    //       <IonModal
+    //         isOpen={showmodal}
+    //         onDidDismiss={() => {
+    //           setShowmodal(false);
+    //         }}
+    //       >
+    //         <ModalApprov
+    //           onclose={() => {
+    //             setShowmodal(false);
+    //             getcom();
+    //           }}
+    //           Invoice={invoice}
+    //           Prix={prixt}
+    //           Datec={date}
+    //           prev_quant={prev_quant}
+    //           quant_appro={quant_appro}
+    //           Etat={etatstat}
+    //           // tab={patient}
+    //         />
+    //       </IonModal>
+    //     </>
+    //   ) : (
     <>
-      {accesparcompte
-        .filter((t: any) => t.id_boutique === boutiqueid.BoutiqueId)
-        .map((bat: any) => {
-          return bat.histo_appro === 1 ? (
-            <>
+      <IonSearchbar
+        mode="ios"
+        value={searchText}
+        placeholder={"rechercher par date"}
+        className="pl-0"
+        animated={true}
+        onIonChange={(e) => {
+          setSearchText(e.detail.value!);
+          // change(e.detail.value!);
+        }}
+        onIonFocus={(e) => {
+          // dispatch(setactive_categ(""));
+          // dispatch(setactive_tendance(""));
+          // setNub(10);
+        }}
+      ></IonSearchbar>
+      <div className="p-3">
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <IonModal
+            isOpen={showmodal}
+            onDidDismiss={() => {
+              setShowmodal(false);
+            }}
+          >
+            <ModalApprov
+              onclose={() => {
+                setShowmodal(false);
+                getcom();
+              }}
+              Invoice={invoice}
+              Prix={prixt}
+              Datec={date}
+              prev_quant={prev_quant}
+              quant_appro={quant_appro}
+              Etat={etatstat}
+              // tab={patient}
+            />
+          </IonModal>
+          <table className="table-auto w-full">
+            {/* Table header */}
+            <thead className="text-xs uppercase text-slate-400 bg-slate-50 rounded-sm">
+              <tr>
+                <th className="p-2">
+                  <div className="font-semibold text-left text-sm">
+                    Type de l'opération
+                  </div>
+                </th>
+                <th className="p-2">
+                  <div className="font-semibold text-center text-sm">
+                    Date de l'opération
+                  </div>
+                </th>
+                <th className="p-2">
+                  <div className="font-semibold text-center text-sm">
+                    Montant
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            {/* Table body */}
+            <tbody className="text-sm font-medium divide-y divide-slate-100">
+              {/* Row */}
               {approv[0] ? (
                 <>
-                  {approv.slice(0, nub).map((card: any, index: any) => {
-                    return (
-                      <IonItem
-                        className=" Itemsv"
-                        onClick={() => {
-                          setShowmodal(true);
-                          // setId(val.idPatient);
-                          permu(
-                            card.date,
-                            card.product_name,
-                            card.stock_appro,
-                            card.total_price,
-                            card.stock_preview
-                          );
-                        }}
-                      >
-                        <IonLabel>
-                          <h3 className="nereide">
-                            <span className="adddate">
-                              {String(new Date(card.date)).split("(")[0]}
-                            </span>{" "}
-                            {/* <span className="add2">{card.invoice}</span>{" "} */}
-                          </h3>
-                          <p className=" add3">
-                            {card.total_price < 0 ? (
-                              <>
-                                <span className="text-purple-700">
-                                  Sortie hors vente:{" "}
+                  {approv.filter(
+                    (t: any) =>
+                      t.date.toLowerCase().includes(searchText.toLowerCase())
+                    // || t.status_id_command === filtrestat
+                  )[0] ? (
+                    approv
+                    .filter(
+                      (t: any) =>
+                        t.date.toLowerCase().includes(searchText.toLowerCase())
+                      // || t.status_id_command === filtrestat
+                    )
+                    .map((card: any, index: any) => {
+                      return (
+                        <tr
+                          onClick={() => {
+                            permu(
+                              card.date,
+                              card.product_name,
+                              card.stock_appro,
+                              card.total_price,
+                              card.stock_preview
+                            );
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <td className="p-2">
+                            <div className="text-sm">
+                              {card.total_price < 0 ? (
+                                <span className="text-neutral-900 font-semibold">
+                                  Sortie hors vente{" "}
                                 </span>
-                                <span className="add5">
-                                  {new Intl.NumberFormat("de-DE", {
-                                    style: "currency",
-                                    currency: "XOF",
-                                  }).format(card.total_price)}
+                              ) : (
+                                <span className="text-neutral-900 font-semibold">
+                                  Approvisionnemnt{" "}
                                 </span>
-                              </>
-                            ) : (
-                              <>
-                                <span className="add4">
-                                  Approvisionnement:{" "}
-                                </span>
-                                <span className="add5">
-                                  {new Intl.NumberFormat("de-DE", {
-                                    style: "currency",
-                                    currency: "XOF",
-                                  }).format(card.total_price)}
-                                </span>
-                              </>
-                            )}
-                          </p>
-                        </IonLabel>
-                      </IonItem>
-                    );
-                  })}
-                  <IonInfiniteScroll
-                    className="scroll1"
-                    onIonInfinite={loadData}
-                    threshold="100px"
-                    disabled={isInfiniteDisabled}
-                  >
-                    <IonInfiniteScrollContent
-                      loadingSpinner="lines-sharp-small"
-                      loadingText="Chargement de données..."
-                    ></IonInfiniteScrollContent>
-                  </IonInfiniteScroll>
+                              )}
+                            </div>
+                          </td>
+                          <td className="p-2">
+                            <div className="text-center text-sm text-cyan-500">
+                              {card.date.split("T")[0]} &nbsp; à &nbsp;{" "}
+                              {card.date.split("T")[1].split(".")[0]}
+                              {/* {card.date.split("T")[0]} */}
+                            </div>
+                          </td>
+                          <td className="p-2">
+                            <div className="text-center text-red-600 text-sm">
+                              {new Intl.NumberFormat("de-DE", {
+                                style: "currency",
+                                currency: "XOF",
+                              }).format(card.total_price)}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <div className="flex items-center justify-center h-20 bg-white w-full">
+                      <span>aucun resultat</span>
+                    </div>
+                  )}
                 </>
               ) : (
-                <>
-                  <div className="items-center justify-center text-center mb-3">
-                    <img className="" src="delai-de-traitement.png" alt="d" />
-                    <h2 className="items-center justify-center text-center ">
-                      aucun approvisionnement
-                    </h2>
-                  </div>
-                </>
+                <div className="items-center justify-center text-center mb-3">
+                  <img className="" src="delai-de-traitement.png" alt="d" />
+                  <h2 className="items-center justify-center text-center ">
+                    aucun approvisionnement
+                  </h2>
+                </div>
               )}
-              <IonModal
-                isOpen={showmodal}
-                onDidDismiss={() => {
-                  setShowmodal(false);
-                }}
-              >
-                <ModalApprov
-                  onclose={() => {
-                    setShowmodal(false);
-                    getcom();
-                  }}
-                  Invoice={invoice}
-                  Prix={prixt}
-                  Datec={date}
-                  prev_quant={prev_quant}
-                  quant_appro={quant_appro}
-                  Etat={etatstat}
-                  // tab={patient}
-                />
-              </IonModal>
-            </>
-          ) : (
-            <div className="flex items-center justify-center text-2xl mt-14">
-              vous n'avez pas accès à cette page
-            </div>
-          );
-        })}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </>
+    //   )}
+    // </>
   );
 };

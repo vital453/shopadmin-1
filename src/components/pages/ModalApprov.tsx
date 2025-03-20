@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
 import {
   IonApp,
@@ -108,7 +109,7 @@ export const ModalApprov: React.SFC<Ajout_utiliformprops> = ({
   const userid = useSelector((state: any) => state.auth.user);
 
   // const getartcom = () => {
-  //   Axios.post("https://backend-shop.benindigital.com/afficheartapprov", {
+  //   Axios.post("https://backendtrader.digitalfirst.space/afficheartapprov", {
   //     invoice: Invoice,
   //     id_boutique: userid.userId,
   //   }).then((ret) => {
@@ -118,7 +119,7 @@ export const ModalApprov: React.SFC<Ajout_utiliformprops> = ({
   // };
 
   // const majstatut = () => {
-  //   Axios.post("https://backend-shop.benindigital.com/majstatut", {
+  //   Axios.post("https://backendtrader.digitalfirst.space/majstatut", {
   //     invoice: Invoice,
   //     id_boutique: userid.userId,
   //   }).then((ret) => {
@@ -156,7 +157,9 @@ export const ModalApprov: React.SFC<Ajout_utiliformprops> = ({
                 Date:
               </IonCol>
               <IonCol className="nereide" size="7">
-                {String(new Date(Datec)).split("(")[0]}
+                {/* {String(new Date(Datec)).split("(")[0]} */}
+                {Datec.split("T")[0]} &nbsp; à &nbsp;{" "}
+                {Datec.split("T")[1].split(".")[0]}
               </IonCol>
             </IonItem>
 

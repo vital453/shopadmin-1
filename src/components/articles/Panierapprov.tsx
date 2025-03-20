@@ -88,7 +88,7 @@ const Panierapprov: React.SFC<Ajout_utiliformprops> = ({ Panier, trigg }) => {
 
 
     const getpan = () => {
-        // fetch('https://backend-shop.benindigital.com/affichepanier').then((res) => {
+        // fetch('https://backendtrader.digitalfirst.space/affichepanier').then((res) => {
         //     const data = res.json()    
         //     return data
         // }).then((data) => {                    
@@ -120,9 +120,9 @@ const Panierapprov: React.SFC<Ajout_utiliformprops> = ({ Panier, trigg }) => {
     const envoi1 = () => {
 
         if (approv.length > 0) {
-            // Axios.post('https://backend-shop.benindigital.com/ajoutapprovList'
+            // Axios.post('https://backendtrader.digitalfirst.space/ajoutapprovList'
             setProgress(true)
-            Axios.post('https://backend-shop.benindigital.com/ajoutapprovList', {
+            Axios.post('https://backendtrader.digitalfirst.space/ajoutapprovList', {
                 approv: approv,
                 tail: parseInt(approv.length),
                 id_boutique: userid.BoutiqueId
@@ -135,7 +135,7 @@ const Panierapprov: React.SFC<Ajout_utiliformprops> = ({ Panier, trigg }) => {
         }
     }
     const suppr = () => {
-        fetch('https://backend-shop.benindigital.com/supprpan', {
+        fetch('https://backendtrader.digitalfirst.space/supprpan', {
         }).then((data) => {
             if (data) {
             } else {
@@ -147,7 +147,7 @@ const Panierapprov: React.SFC<Ajout_utiliformprops> = ({ Panier, trigg }) => {
 
 
     const envoi = (ide: any | React.SetStateAction<any>) => {
-        Axios.post('https://backend-shop.benindigital.com/ajoutapprov', {
+        Axios.post('https://backendtrader.digitalfirst.space/ajoutapprov', {
             totalquant: totalquant,
             totalprix: totalprix,
             invoice: ide,
@@ -165,7 +165,7 @@ const Panierapprov: React.SFC<Ajout_utiliformprops> = ({ Panier, trigg }) => {
     }
 
     const envoi3 = () => {
-        Axios.post('https://backend-shop.benindigital.com/approv2', {
+        Axios.post('https://backendtrader.digitalfirst.space/approv2', {
             approv: approv,
             tail: parseInt(approv.length),
             id_boutique: userid.BoutiqueId
@@ -184,12 +184,12 @@ const Panierapprov: React.SFC<Ajout_utiliformprops> = ({ Panier, trigg }) => {
 
 
     const refr = () => {
-        Axios.post('https://backend-shop.benindigital.com/afficheart',{
+        Axios.post('https://backendtrader.digitalfirst.space/afficheart',{
             id_boutique: userid.BoutiqueId,
         }).then((ret)=>{
             dispatch(recupProduct(ret.data));
             console.log(ret.data);
-            Axios.post('https://backend-shop.benindigital.com/afficheapprov',{
+            Axios.post('https://backendtrader.digitalfirst.space/afficheapprov',{
                 id_boutique: userid.BoutiqueId,
             }).then((ret)=>{
                 dispatch(recupApprovisionnement(ret.data));

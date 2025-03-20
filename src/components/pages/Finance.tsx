@@ -116,6 +116,7 @@ export const Finance: React.FC<Ajout_utiliformprops> = ({ }) => {
     ];
     const router = useIonRouter();
     let [dateactu, setDateactu] = useState(useSelector((state: any) => state.Hash.date_actu));
+    
     useEffect(() => {
         console.log(dateactu);
     }, []);

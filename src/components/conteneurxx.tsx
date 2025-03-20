@@ -1,3 +1,6 @@
+/* eslint-disable no-lone-blocks */
+/* eslint-disable eqeqeq */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { useEffect, useState } from "react";
 import { IonApp, IonButton, IonCol, IonList, IonModal, IonThumbnail, IonSearchbar, IonContent, IonAvatar, IonSelectOption, IonPage, IonItemDivider, IonSelect, IonRadioGroup, IonGrid, IonHeader, IonInput, IonItem, IonLabel, IonRow, IonTitle, IonToolbar, IonIcon, IonAlert, IonButtons, IonMenuButton, IonTabBar, IonTabButton, IonTabs, IonRouterOutlet, IonCard, IonCardContent, IonCardTitle, IonNote, IonBadge, IonRouterLink, IonFabButton, IonLoading, IonToast } from "@ionic/react";
@@ -6,8 +9,8 @@ import Axios from 'axios'
 import './conteneur.css'
 import { triangle, ellipse, square, arrowBack, arrowForward, personCircleOutline, globeOutline, removeCircleSharp, removeOutline, addOutline, informationCircle, star } from 'ionicons/icons';
 import { Route, Redirect } from 'react-router';
-import { tab4 } from './articles/Paniermodal';
-import { tab5 } from './articles/PanierItem';
+// import { tab4 } from './articles/Paniermodal';
+// import { tab5 } from './articles/PanierItem';
 
 
 
@@ -80,28 +83,28 @@ export const Conteneur: React.SFC<Ajout_utiliformprops> = ({ Nom, Prix, Id, Stoc
     //     setShowLoading(false);
     // }, 10000);
     const refr = () => {
-        getpan()
-        if (tab5 == 14) {
-            fetch('https://backend-shop.benindigital.com/affichepanier').then((res) => {
-                const data = res.json()
-                return data
-            }).then((data) => {
-                setPanier(data);
-                setClic(false);
-                for (var i = 0, len = data.length, a = 0; i < len; i++) {
-                    if (data[i].product_id == Id) {
-                        setCommand(true);
-                        a = a + 1;
-                        console.log(data[i].product_quantity);
-                        setAjoute(data[i].product_quantity);
-                    }
-                    if (a == 0 && i == (len - 1)) {
-                        setCommand(false)
-                    }
-                }
+        // getpan()
+        // if (tab5 == 14) {
+        //     fetch('https://backendtrader.digitalfirst.space/affichepanier').then((res) => {
+        //         const data = res.json()
+        //         return data
+        //     }).then((data) => {
+        //         setPanier(data);
+        //         setClic(false);
+        //         for (var i = 0, len = data.length, a = 0; i < len; i++) {
+        //             if (data[i].product_id == Id) {
+        //                 setCommand(true);
+        //                 a = a + 1;
+        //                 console.log(data[i].product_quantity);
+        //                 setAjoute(data[i].product_quantity);
+        //             }
+        //             if (a == 0 && i == (len - 1)) {
+        //                 setCommand(false)
+        //             }
+        //         }
 
-            })
-        }
+        //     })
+        // }
     }
 
 
@@ -116,50 +119,50 @@ export const Conteneur: React.SFC<Ajout_utiliformprops> = ({ Nom, Prix, Id, Stoc
         }
     };
 
-    const getpan = () => {
+    // const getpan = () => {
 
-        if (panier && (clic == false) && (tab4 == 12)) {
-            for (var i = 0, len = panier.length, a = 0; i < len; i++) {
-                if (panier[i].product_id == Id) {
-                    setCommand(true);
-                    a = 2;
-                    setAjoute(panier[i].product_quantity);
-
-
-                }
-                if (a == 0 && i == (len - 1)) {
-                    setCommand(false)
-                }
-            }
-        } else {
-            fetch('https://backend-shop.benindigital.com/affichepanier').then((res) => {
-                const data = res.json()
-                return data
-            }).then((data) => {
-                setPanier(data);
-                setClic(false);
+    //     if (panier && (clic == false) && (tab4 == 12)) {
+    //         for (var i = 0, len = panier.length, a = 0; i < len; i++) {
+    //             if (panier[i].product_id == Id) {
+    //                 setCommand(true);
+    //                 a = 2;
+    //                 setAjoute(panier[i].product_quantity);
 
 
-                for (var i = 0, len = data.length, a = 0; i < len; i++) {
-                    if (data[i].product_id == Id) {
-                        setCommand(true);
-                        a = a + 1;
-                        console.log(data[i].product_quantity);
-                        setAjoute(data[i].product_quantity);
-                    }
-                    if (a == 0 && i == (len - 1)) {
-                        setCommand(false)
-                    }
-                }
-            })
-        }
+    //             }
+    //             if (a == 0 && i == (len - 1)) {
+    //                 setCommand(false)
+    //             }
+    //         }
+    //     } else {
+    //         fetch('https://backendtrader.digitalfirst.space/affichepanier').then((res) => {
+    //             const data = res.json()
+    //             return data
+    //         }).then((data) => {
+    //             setPanier(data);
+    //             setClic(false);
+
+
+    //             for (var i = 0, len = data.length, a = 0; i < len; i++) {
+    //                 if (data[i].product_id == Id) {
+    //                     setCommand(true);
+    //                     a = a + 1;
+    //                     console.log(data[i].product_quantity);
+    //                     setAjoute(data[i].product_quantity);
+    //                 }
+    //                 if (a == 0 && i == (len - 1)) {
+    //                     setCommand(false)
+    //                 }
+    //             }
+    //         })
+    //     }
 
 
 
-    }
+    // }
     const suppression = (ide: number | React.SetStateAction<any>) => {
 
-        Axios.delete(`https://backend-shop.benindigital.com/deletepan/${ide}`);
+        Axios.delete(`https://backendtrader.digitalfirst.space/deletepan/${ide}`);
         setCommand(false);
         setAjoute(quantite);
         setClic(true);
@@ -184,7 +187,7 @@ export const Conteneur: React.SFC<Ajout_utiliformprops> = ({ Nom, Prix, Id, Stoc
                 setAjoute(quantite)
                 setCommand(true);
 
-                Axios.put('https://backend-shop.benindigital.com/majpan', {
+                Axios.put('https://backendtrader.digitalfirst.space/majpan', {
                     product_quantity: parseInt(quantite),
                     product_id: Id,
                     price: Prix,
@@ -207,7 +210,7 @@ export const Conteneur: React.SFC<Ajout_utiliformprops> = ({ Nom, Prix, Id, Stoc
             setAjoute(quantite)
             setCommand(true);
             aff1();
-            Axios.post('https://backend-shop.benindigital.com/ajoutpanier', {
+            Axios.post('https://backendtrader.digitalfirst.space/ajoutpanier', {
                 product_quantity: parseInt(quantite),
                 product_name: nom,
                 unite_price: parseInt(prix),
@@ -235,7 +238,7 @@ export const Conteneur: React.SFC<Ajout_utiliformprops> = ({ Nom, Prix, Id, Stoc
 
 
     useEffect(() => {
-        getpan();
+        // getpan();
         refr();
     });
     return (
@@ -253,7 +256,7 @@ export const Conteneur: React.SFC<Ajout_utiliformprops> = ({ Nom, Prix, Id, Stoc
 
                     { window.location.href = ` /home/articledesc/${Id} ` };
                 }}>
-                    <img src={`https://backend-shop.benindigital.com/${Ig}`} alt="card" className="imga" />
+                    <img src={`https://backendtrader.digitalfirst.space/${Ig}`} alt="card" className="imga" />
                 </div>
 
                 <IonCardContent className='cardcontent'>

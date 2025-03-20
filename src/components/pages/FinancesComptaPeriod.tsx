@@ -23,6 +23,9 @@ import { chevronBack } from "ionicons/icons";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { format } from "date-fns";
+import Sidebar from "../Sidebar";
+import Header from "../Header";
+import axios from "axios";
 
 interface Ajout_utiliformprops {
   // nom: String;
@@ -37,78 +40,127 @@ export const FinancesComptaPeriod: React.FC<Ajout_utiliformprops> = ({}) => {
   );
   const boutiqueid = useSelector((state: any) => state.auth.user);
   const accesparcompte = useSelector((state: any) => state.Hash.accesparcompte);
+  // largeur de la page
+  const [width, setWindowWidth] = useState(window.innerWidth);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // MAJ des dimensions
+  const updateDimensions = () => {
+    // const width = window.innerWidth;
+    setWindowWidth(window.innerWidth);
+  };
+
   useEffect(() => {}, []);
-  return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonRouterLink routerLink={`/Finances`} color="dark">
-              <IonButton
-              // onClick={() => {
-              //   // router.goBack();
-              //   window.location.href="/Finances"
-              // }}
-              >
-                <IonIcon color="medium" icon={chevronBack} />
-              </IonButton>
-            </IonRouterLink>
-          </IonButtons>
-          <IonTitle className="nereide">Digital trader</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent>
-        {accesparcompte
-          .filter((t: any) => t.id_boutique === boutiqueid.BoutiqueId)
-          .map((bat: any) => {
-            return bat.finance_periode === 1 ? (
-              <>
-                <IonHeader collapse="condense">
-                  <IonToolbar>
-                    <IonTitle size="large" className="page-title">
-                      <IonLabel>Finances </IonLabel>
-                      <IonNote>comptabilité</IonNote>
-                    </IonTitle>
-                  </IonToolbar>
-                </IonHeader>
-                <IonList>
-                  <div className="homes">
-                    <IonSegment
-                      className="nereide mb-3"
-                      onIonChange={(e) => {
-                        setSeg(e.detail.value);
-                      }}
-                      value={seg}
-                      scrollable={true}
-                      mode="ios"
-                    >
-                      <IonSegmentButton value="Par_produits">
-                        <IonLabel>Par produits</IonLabel>
-                      </IonSegmentButton>
-                      <IonSegmentButton value="Global">
-                        <IonLabel>Global</IonLabel>
-                      </IonSegmentButton>
-                    </IonSegment>
-                    <div className="div2">
-                      {seg == "Par_produits" ? (
-                        <FinancesComptaPeriodArt dateactu={dateactu} />
-                      ) : null}
-                      {seg == "Global" ? (
-                        <FinancesComptaPeriodGlob dateactu={dateactu} />
-                      ) : null}
-                    </div>
-                  </div>
-                </IonList>
-              </>
-            ) : (
-              <div className="flex items-center justify-center text-2xl mt-14">
-                vous n'avez pas accès à cette page
+
+  window.addEventListener("resize", updateDimensions);
+
+  if (width < 500) {
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <IonRouterLink routerLink={`/Finances`} color="dark">
+                <IonButton
+                // onClick={() => {
+                //   // router.goBack();
+                //   window.location.href="/Finances"
+                // }}
+                >
+                  <IonIcon color="medium" icon={chevronBack} />
+                </IonButton>
+              </IonRouterLink>
+            </IonButtons>
+            <IonTitle className="nereide">Digital trader</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <>
+            <IonHeader collapse="condense">
+              <IonToolbar>
+                <IonTitle size="large" className="page-title">
+                  <IonLabel>Finances </IonLabel>
+                  <IonNote>comptabilité</IonNote>
+                </IonTitle>
+              </IonToolbar>
+            </IonHeader>
+            <IonList>
+              <div className="homes">
+                <IonSegment
+                  className="nereide mb-3"
+                  onIonChange={(e) => {
+                    setSeg(e.detail.value);
+                  }}
+                  value={seg}
+                  scrollable={true}
+                  mode="ios"
+                >
+                  <IonSegmentButton value="Par_produits">
+                    <IonLabel>Par produits</IonLabel>
+                  </IonSegmentButton>
+                  <IonSegmentButton value="Global">
+                    <IonLabel>Global</IonLabel>
+                  </IonSegmentButton>
+                </IonSegment>
+                <div className="div2">
+                  {seg == "Par_produits" ? (
+                    <FinancesComptaPeriodArt dateactu={dateactu} />
+                  ) : null}
+                  {seg == "Global" ? (
+                    <FinancesComptaPeriodGlob dateactu={dateactu} />
+                  ) : null}
+                </div>
               </div>
-            );
-          })}
-      </IonContent>
-    </IonPage>
-  );
+            </IonList>
+          </>
+        </IonContent>
+      </IonPage>
+    );
+  } else {
+    return (
+      <div className="flex h-screen overflow-hidden">
+        {/* Sidebar */}
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
+        {/* Content area */}
+        <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+          {/*  Site header */}
+          <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
+          <main>
+            <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+              <div className="w-full">
+                <IonSegment
+                  className="nereide mb-3"
+                  onIonChange={(e) => {
+                    setSeg(e.detail.value);
+                  }}
+                  value={seg}
+                  scrollable={true}
+                  mode="ios"
+                >
+                  <IonSegmentButton value="Par_produits">
+                    <IonLabel>Par produits</IonLabel>
+                  </IonSegmentButton>
+                  <IonSegmentButton value="Global">
+                    <IonLabel>Global</IonLabel>
+                  </IonSegmentButton>
+                </IonSegment>
+                <div className="div2">
+                  {seg == "Par_produits" ? (
+                    <FinancesComptaPeriodArt dateactu={dateactu} />
+                  ) : null}
+                  {seg == "Global" ? (
+                    <FinancesComptaPeriodGlob dateactu={dateactu} />
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 };
 
 interface Ajout_utiliformpropsone {
@@ -137,6 +189,16 @@ export const FinancesComptaPeriodArt: React.FC<Ajout_utiliformpropsone> = ({
   const [montotalvendu, setMontotalvendu] = useState<any>();
   let article = useSelector((state: any) => state.product.product);
   const dispatch = useDispatch();
+
+  const recup_date_server = () => {
+    axios
+      .get("https://backendtrader.digitalfirst.space/date_time")
+      .then((res) => {
+        // setdateserveur(res.data[0].time_actu);
+        setDatedebut(format(Date.parse(res.data[0].time_actu), "yyyy-MM-dd"));
+        setDatefin(format(Date.parse(res.data[0].time_actu), "yyyy-MM-dd"));
+      });
+  };
 
   const vtotalsold = (
     a: any | React.SetStateAction<any>,
@@ -233,128 +295,336 @@ export const FinancesComptaPeriodArt: React.FC<Ajout_utiliformpropsone> = ({
         .reduce((prev: any, curr: any) => prev + curr, 0)
     );
   };
+  const choiceacces = useSelector((state: any) => state.Hash.choiceacces);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    recup_date_server();
+  }, []);
+
   return (
-    <IonList>
-      <div className="">
-        <IonItem lines="none">
-          <IonLabel position="stacked">
-            <h2 className="labh">Date de début</h2>
-          </IonLabel>
-          <IonInput
-            color="success"
-            type="date"
-            value={datedebut}
-            onIonChange={(e) => {
-              setDatedebut(format(new Date(e.detail.value!), "yyyy-MM-dd"));
-              vtotalsold(produit, e.detail.value, datefin);
-              vmontotalv(produit, e.detail.value, datefin);
-              vbenef(produit, e.detail.value, datefin);
-              vtotalapprov(produit, e.detail.value, datefin);
-            }}
-          ></IonInput>
-        </IonItem>
-        <IonItem lines="none" className="ion-margin-top">
-          <IonLabel position="stacked">
-            <h2 className="labh">Date de fin</h2>
-          </IonLabel>
-          <IonInput
-            color="danger"
-            type="date"
-            value={datefin}
-            onIonChange={(e) => {
-              setDatefin(format(new Date(e.detail.value!), "yyyy-MM-dd"));
-              vtotalsold(produit, datedebut, e.detail.value);
-              vmontotalv(produit, datedebut, e.detail.value);
-              vbenef(produit, datedebut, e.detail.value);
-              vtotalapprov(produit, datedebut, e.detail.value);
-            }}
-          ></IonInput>
-        </IonItem>
-        <IonItem className="ion-margin-top" lines="none">
-          <IonLabel position="floating">Produits</IonLabel>
-          <IonSelect
-            value={produit}
-            placeholder="Selectionnez un produit"
-            onIonChange={(e) => {
-              setProduit(e.detail.value);
-              vtotalsold(e.detail.value, datedebut, datefin);
-              vbenef(e.detail.value, datedebut, datefin);
-              vmontotalv(e.detail.value, datedebut, datefin);
-              vtotalapprov(e.detail.value, datedebut, datefin);
-            }}
-          >
-            {article.map((card: any, index: any) => {
-              return (
-                <IonSelectOption value={card.id}>{card.name}</IonSelectOption>
-              );
-            })}
-          </IonSelect>
-        </IonItem>
+    <>
+      {" "}
+      <IonList>
+        <div className="">
+          <IonItem lines="none">
+            <IonLabel position="stacked">
+              <h2 className="labh">Date de début</h2>
+            </IonLabel>
+            <IonInput
+              color="success"
+              className="border-1 rounded-sm shadow-md border-x-stone-400"
+              type="date"
+              value={datedebut}
+              onIonChange={(e) => {
+                setDatedebut(format(new Date(e.detail.value!), "yyyy-MM-dd"));
+                vtotalsold(produit, e.detail.value, datefin);
+                vmontotalv(produit, e.detail.value, datefin);
+                vbenef(produit, e.detail.value, datefin);
+                vtotalapprov(produit, e.detail.value, datefin);
+              }}
+            ></IonInput>
+          </IonItem>
+          <IonItem lines="none" className="ion-margin-top">
+            <IonLabel position="stacked">
+              <h2 className="labh">Date de fin</h2>
+            </IonLabel>
+            <IonInput
+              color="danger"
+              className="border-1 rounded-sm shadow-md border-x-stone-400"
+              type="date"
+              value={datefin}
+              onIonChange={(e) => {
+                setDatefin(format(new Date(e.detail.value!), "yyyy-MM-dd"));
+                vtotalsold(produit, datedebut, e.detail.value);
+                vmontotalv(produit, datedebut, e.detail.value);
+                vbenef(produit, datedebut, e.detail.value);
+                vtotalapprov(produit, datedebut, e.detail.value);
+              }}
+            ></IonInput>
+          </IonItem>
+          <IonItem className="ion-margin-top" lines="none">
+            <IonLabel position="floating">Produits</IonLabel>
+            <IonSelect
+              value={produit}
+              placeholder="Selectionnez un produit"
+              onIonChange={(e) => {
+                setProduit(e.detail.value);
+                vtotalsold(e.detail.value, datedebut, datefin);
+                vbenef(e.detail.value, datedebut, datefin);
+                vmontotalv(e.detail.value, datedebut, datefin);
+                vtotalapprov(e.detail.value, datedebut, datefin);
+              }}
+            >
+              {article.map((card: any, index: any) => {
+                return (
+                  <IonSelectOption value={card.id}>{card.name}</IonSelectOption>
+                );
+              })}
+            </IonSelect>
+          </IonItem>
 
-        <div className="grid1">
-          <IonItem lines="none" className="ion-margin-top">
-            <IonLabel>
-              <h2 className="labh">Total vendu :</h2>
-            </IonLabel>
-            <IonLabel>
-              <h2 className="labh">{totalvendu}</h2>
-            </IonLabel>
-          </IonItem>
-          <IonItem lines="none" className="ion-margin-top">
-            <IonLabel>
-              <h2 className="labh">Bénéfices :</h2>
-            </IonLabel>
-            <IonLabel>
-              <h2 className="labh">{benefice}</h2>
-            </IonLabel>
-          </IonItem>
-          <IonItem lines="none" className="ion-margin-top">
-            <IonLabel>
-              <h2 className="labh">Montant vendu :</h2>
-            </IonLabel>
-            <IonLabel>
-              <h2 className="labh">{montotalvendu}</h2>
-            </IonLabel>
-          </IonItem>
-          <IonItem lines="none" className="ion-margin-top">
-            <IonLabel>
-              <h2 className="labh">total approvisionné :</h2>
-            </IonLabel>
-            <IonLabel>
-              <h2 className="labh">{totalapprov}</h2>
-            </IonLabel>
-          </IonItem>
-          {/* <div className="mt-2"></div>
-          <div className="md:w-full">
-            <LineChart />
-          </div> */}
-          {/* <div className="mt-2"></div>
-              <div className="md:w-full">
-                <Stacked />
-              </div> */}
-          {/* <div className="mt-2"></div>
-              <div className="md:w-full">
-                <Chart
-                  id="pie-chart"
-                  data={ecomPieChartData}
-                  legendVisiblity={false}
-                />
-              </div> */}
+          <div className="grid1">
+            <IonItem lines="none" className="ion-margin-top">
+              <IonLabel>
+                <h2 className="labh">Total vendu :</h2>
+              </IonLabel>
+              <IonLabel>
+                <h2 className="labh">{totalvendu}</h2>
+              </IonLabel>
+            </IonItem>
+            <IonItem lines="none" className="ion-margin-top">
+              <IonLabel>
+                <h2 className="labh">Bénéfices :</h2>
+              </IonLabel>
+              <IonLabel>
+                <h2 className="labh">{benefice}</h2>
+              </IonLabel>
+            </IonItem>
+            <IonItem lines="none" className="ion-margin-top">
+              <IonLabel>
+                <h2 className="labh">Montant vendu :</h2>
+              </IonLabel>
+              <IonLabel>
+                <h2 className="labh">{montotalvendu}</h2>
+              </IonLabel>
+            </IonItem>
+            <IonItem lines="none" className="ion-margin-top">
+              <IonLabel>
+                <h2 className="labh">total approvisionné :</h2>
+              </IonLabel>
+              <IonLabel>
+                <h2 className="labh">{totalapprov}</h2>
+              </IonLabel>
+            </IonItem>
+            {/* <div className="mt-2"></div>
+        <div className="md:w-full">
+          <LineChart />
+        </div> */}
+            {/* <div className="mt-2"></div>
+            <div className="md:w-full">
+              <Stacked />
+            </div> */}
+            {/* <div className="mt-2"></div>
+            <div className="md:w-full">
+              <Chart
+                id="pie-chart"
+                data={ecomPieChartData}
+                legendVisiblity={false}
+              />
+            </div> */}
+          </div>
+          {/* <IonItem>
+        <IonButton
+          onClick={(e) => {
+            regroupjour(produit, datedebut, datefin)
+          }}
+        >
+          ddf
+        </IonButton>
+      </IonItem> */}
         </div>
-        {/* <IonItem>
-          <IonButton
-            onClick={(e) => {
-              regroupjour(produit, datedebut, datefin)
-            }}
-          >
-            ddf
-          </IonButton>
-        </IonItem> */}
-      </div>
-    </IonList>
+      </IonList>
+    </>
   );
+  // return choiceacces === "aucun" || choiceacces === "principal" ? (
+  //   <>
+  //     {" "}
+  //     <IonList>
+  //       <div className="">
+  //         <IonItem lines="none">
+  //           <IonLabel position="stacked">
+  //             <h2 className="labh">Date de début</h2>
+  //           </IonLabel>
+  //           <IonInput
+  //             color="success"
+  //             type="date"
+  //             value={datedebut}
+  //             onIonChange={(e) => {
+  //               setDatedebut(format(new Date(e.detail.value!), "yyyy-MM-dd"));
+  //               vtotalsold(produit, e.detail.value, datefin);
+  //               vmontotalv(produit, e.detail.value, datefin);
+  //               vbenef(produit, e.detail.value, datefin);
+  //               vtotalapprov(produit, e.detail.value, datefin);
+  //             }}
+  //           ></IonInput>
+  //         </IonItem>
+  //         <IonItem lines="none" className="ion-margin-top">
+  //           <IonLabel position="stacked">
+  //             <h2 className="labh">Date de fin</h2>
+  //           </IonLabel>
+  //           <IonInput
+  //             color="danger"
+  //             type="date"
+  //             value={datefin}
+  //             onIonChange={(e) => {
+  //               setDatefin(format(new Date(e.detail.value!), "yyyy-MM-dd"));
+  //               vtotalsold(produit, datedebut, e.detail.value);
+  //               vmontotalv(produit, datedebut, e.detail.value);
+  //               vbenef(produit, datedebut, e.detail.value);
+  //               vtotalapprov(produit, datedebut, e.detail.value);
+  //             }}
+  //           ></IonInput>
+  //         </IonItem>
+  //         <IonItem className="ion-margin-top" lines="none">
+  //           <IonLabel position="floating">Produits</IonLabel>
+  //           <IonSelect
+  //             value={produit}
+  //             placeholder="Selectionnez un produit"
+  //             onIonChange={(e) => {
+  //               setProduit(e.detail.value);
+  //               vtotalsold(e.detail.value, datedebut, datefin);
+  //               vbenef(e.detail.value, datedebut, datefin);
+  //               vmontotalv(e.detail.value, datedebut, datefin);
+  //               vtotalapprov(e.detail.value, datedebut, datefin);
+  //             }}
+  //           >
+  //             {article.map((card: any, index: any) => {
+  //               return (
+  //                 <IonSelectOption value={card.id}>{card.name}</IonSelectOption>
+  //               );
+  //             })}
+  //           </IonSelect>
+  //         </IonItem>
+
+  //         <div className="grid1">
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">Total vendu :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{totalvendu}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">Bénéfices :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{benefice}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">Montant vendu :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{montotalvendu}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">total approvisionné :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{totalapprov}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+
+  //         </div>
+
+  //       </div>
+  //     </IonList>
+  //   </>
+  // ) : (
+  //   <>
+  //     {" "}
+  //     <IonList>
+  //       <div className="">
+  //         <IonItem lines="none">
+  //           <IonLabel position="stacked">
+  //             <h2 className="labh">Date de début</h2>
+  //           </IonLabel>
+  //           <IonInput
+  //             color="success"
+  //             type="date"
+  //             value={datedebut}
+  //             onIonChange={(e) => {
+  //               setDatedebut(format(new Date(e.detail.value!), "yyyy-MM-dd"));
+  //               vtotalsold(produit, e.detail.value, datefin);
+  //               vmontotalv(produit, e.detail.value, datefin);
+  //               vbenef(produit, e.detail.value, datefin);
+  //               vtotalapprov(produit, e.detail.value, datefin);
+  //             }}
+  //           ></IonInput>
+  //         </IonItem>
+  //         <IonItem lines="none" className="ion-margin-top">
+  //           <IonLabel position="stacked">
+  //             <h2 className="labh">Date de fin</h2>
+  //           </IonLabel>
+  //           <IonInput
+  //             color="danger"
+  //             type="date"
+  //             value={datefin}
+  //             onIonChange={(e) => {
+  //               setDatefin(format(new Date(e.detail.value!), "yyyy-MM-dd"));
+  //               vtotalsold(produit, datedebut, e.detail.value);
+  //               vmontotalv(produit, datedebut, e.detail.value);
+  //               vbenef(produit, datedebut, e.detail.value);
+  //               vtotalapprov(produit, datedebut, e.detail.value);
+  //             }}
+  //           ></IonInput>
+  //         </IonItem>
+  //         <IonItem className="ion-margin-top" lines="none">
+  //           <IonLabel position="floating">Produits</IonLabel>
+  //           <IonSelect
+  //             value={produit}
+  //             placeholder="Selectionnez un produit"
+  //             onIonChange={(e) => {
+  //               setProduit(e.detail.value);
+  //               vtotalsold(e.detail.value, datedebut, datefin);
+  //               vbenef(e.detail.value, datedebut, datefin);
+  //               vmontotalv(e.detail.value, datedebut, datefin);
+  //               vtotalapprov(e.detail.value, datedebut, datefin);
+  //             }}
+  //           >
+  //             {article.map((card: any, index: any) => {
+  //               return (
+  //                 <IonSelectOption value={card.id}>{card.name}</IonSelectOption>
+  //               );
+  //             })}
+  //           </IonSelect>
+  //         </IonItem>
+
+  //         <div className="grid1">
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">Total vendu :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{totalvendu}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">Bénéfices :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{benefice}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">Montant vendu :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{montotalvendu}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">total approvisionné :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{totalapprov}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+
+  //         </div>
+
+  //       </div>
+  //     </IonList>
+  //   </>
+  // );
 };
 
 interface Ajout_utiliformpropsglob {
@@ -382,7 +652,17 @@ export const FinancesComptaPeriodGlob: React.FC<Ajout_utiliformpropsglob> = ({
   const [montotalvendu, setMontotalvendu] = useState<any>();
   let article: any = useSelector((state: any) => state.product.product);
   const dispatch = useDispatch();
+  const choiceacces = useSelector((state: any) => state.Hash.choiceacces);
 
+  const recup_date_server = () => {
+    axios
+      .get("https://backendtrader.digitalfirst.space/date_time")
+      .then((res) => {
+        // setdateserveur(res.data[0].time_actu);
+        setDatedebut(format(Date.parse(res.data[0].time_actu), "yyyy-MM-dd"));
+        setDatefin(format(Date.parse(res.data[0].time_actu), "yyyy-MM-dd"));
+      });
+  };
   const vtotalsold = (
     b: any | React.SetStateAction<any>,
     c: any | React.SetStateAction<any>
@@ -487,136 +767,300 @@ export const FinancesComptaPeriodGlob: React.FC<Ajout_utiliformpropsglob> = ({
     );
   };
 
-  useEffect(() => {}, []);
-  return (
-    <IonList>
-      <div className="">
-        <IonItem lines="none">
-          <IonLabel position="stacked">
-            <h2 className="labh">Date de début</h2>
-          </IonLabel>
-          <IonInput
-            color="success"
-            type="date"
-            value={datedebut}
-            onIonChange={(e) => {
-              setDatedebut(format(new Date(e.detail.value!), "yyyy-MM-dd"));
-              vtotalsold(e.detail.value, datefin);
-              vmontotalv(e.detail.value, datefin);
-              vbenef(e.detail.value, datefin);
-              vtotalapprov(e.detail.value, datefin);
-            }}
-          ></IonInput>
-        </IonItem>
-        <IonItem lines="none" className="ion-margin-top">
-          <IonLabel position="stacked">
-            <h2 className="labh">Date de fin</h2>
-          </IonLabel>
-          <IonInput
-            color="danger"
-            type="date"
-            value={datefin}
-            onIonChange={(e) => {
-              setDatefin(format(new Date(e.detail.value!), "yyyy-MM-dd"));
-              vtotalsold(datedebut, e.detail.value);
-              vmontotalv(datedebut, e.detail.value);
-              vbenef(datedebut, e.detail.value);
-              vtotalapprov(datedebut, e.detail.value);
-            }}
-          ></IonInput>
-        </IonItem>
-        {/* <IonItem className="ion-margin-top" lines="none">
-        <IonLabel position="floating">Produits</IonLabel>
-        <IonSelect
-          value={produit}
-          placeholder="Selectionnez un produit"
-          onIonChange={(e) => {
-            setProduit(e.detail.value);
-            vtotalsold(e.detail.value
-              , datedebut, datefin
-              );
-            vbenef(e.detail.value
-              , datedebut, datefin
-              );
-            vmontotalv(e.detail.value
-              , datedebut, datefin
-              );
-            vtotalapprov(e.detail.value
-              , datedebut, datefin
-              );
-          }}
-        >
-          {article.map((card: any, index: any) => {
-            return (
-              <IonSelectOption value={card.id}>
-                {card.name}
-              </IonSelectOption>
-            );
-          })}
-        </IonSelect>
-      </IonItem> */}
+  useEffect(() => {recup_date_server()}, []);
 
-        <div className="grid1">
-          <IonItem lines="none" className="ion-margin-top">
-            <IonLabel>
-              <h2 className="labh">Total vendu :</h2>
+  return (
+    <>
+      {" "}
+      <IonList>
+        <div className="">
+          <IonItem lines="none">
+            <IonLabel position="stacked">
+              <h2 className="labh">Date de début</h2>
             </IonLabel>
-            <IonLabel>
-              <h2 className="labh">{totalvendu}</h2>
-            </IonLabel>
+            <IonInput
+              color="success"
+              type="date"
+              className="border-1 rounded-sm shadow-md border-x-stone-400"
+              value={datedebut}
+              onIonChange={(e) => {
+                setDatedebut(format(new Date(e.detail.value!), "yyyy-MM-dd"));
+                vtotalsold(e.detail.value, datefin);
+                vmontotalv(e.detail.value, datefin);
+                vbenef(e.detail.value, datefin);
+                vtotalapprov(e.detail.value, datefin);
+              }}
+            ></IonInput>
           </IonItem>
           <IonItem lines="none" className="ion-margin-top">
-            <IonLabel>
-              <h2 className="labh">Bénéfices :</h2>
+            <IonLabel position="stacked">
+              <h2 className="labh">Date de fin</h2>
             </IonLabel>
-            <IonLabel>
-              <h2 className="labh">{benefice}</h2>
-            </IonLabel>
+            <IonInput
+              color="danger"
+              type="date"
+              className="border-1 rounded-sm shadow-md border-x-stone-400"
+              value={datefin}
+              onIonChange={(e) => {
+                setDatefin(format(new Date(e.detail.value!), "yyyy-MM-dd"));
+                vtotalsold(datedebut, e.detail.value);
+                vmontotalv(datedebut, e.detail.value);
+                vbenef(datedebut, e.detail.value);
+                vtotalapprov(datedebut, e.detail.value);
+              }}
+            ></IonInput>
           </IonItem>
-          <IonItem lines="none" className="ion-margin-top">
-            <IonLabel>
-              <h2 className="labh">Montant vendu :</h2>
-            </IonLabel>
-            <IonLabel>
-              <h2 className="labh">{montotalvendu}</h2>
-            </IonLabel>
-          </IonItem>
-          <IonItem lines="none" className="ion-margin-top">
-            <IonLabel>
-              <h2 className="labh">total approvisionné :</h2>
-            </IonLabel>
-            <IonLabel>
-              <h2 className="labh">{totalapprov}</h2>
-            </IonLabel>
-          </IonItem>
-          {/* <div className="mt-2"></div>
+          {/* <IonItem className="ion-margin-top" lines="none">
+    <IonLabel position="floating">Produits</IonLabel>
+    <IonSelect
+      value={produit}
+      placeholder="Selectionnez un produit"
+      onIonChange={(e) => {
+        setProduit(e.detail.value);
+        vtotalsold(e.detail.value
+          , datedebut, datefin
+          );
+        vbenef(e.detail.value
+          , datedebut, datefin
+          );
+        vmontotalv(e.detail.value
+          , datedebut, datefin
+          );
+        vtotalapprov(e.detail.value
+          , datedebut, datefin
+          );
+      }}
+    >
+      {article.map((card: any, index: any) => {
+        return (
+          <IonSelectOption value={card.id}>
+            {card.name}
+          </IonSelectOption>
+        );
+      })}
+    </IonSelect>
+  </IonItem> */}
+
+          <div className="grid1">
+            <IonItem lines="none" className="ion-margin-top">
+              <IonLabel>
+                <h2 className="labh">Total vendu :</h2>
+              </IonLabel>
+              <IonLabel>
+                <h2 className="labh">{totalvendu}</h2>
+              </IonLabel>
+            </IonItem>
+            <IonItem lines="none" className="ion-margin-top">
+              <IonLabel>
+                <h2 className="labh">Bénéfices :</h2>
+              </IonLabel>
+              <IonLabel>
+                <h2 className="labh">{benefice}</h2>
+              </IonLabel>
+            </IonItem>
+            <IonItem lines="none" className="ion-margin-top">
+              <IonLabel>
+                <h2 className="labh">Montant vendu :</h2>
+              </IonLabel>
+              <IonLabel>
+                <h2 className="labh">{montotalvendu}</h2>
+              </IonLabel>
+            </IonItem>
+            <IonItem lines="none" className="ion-margin-top">
+              <IonLabel>
+                <h2 className="labh">total approvisionné :</h2>
+              </IonLabel>
+              <IonLabel>
+                <h2 className="labh">{totalapprov}</h2>
+              </IonLabel>
+            </IonItem>
+            {/* <div className="mt-2"></div>
+    <div className="md:w-full">
+      <LineChart />
+    </div> */}
+            {/* <div className="mt-2"></div>
         <div className="md:w-full">
-          <LineChart />
+          <Stacked />
         </div> */}
-          {/* <div className="mt-2"></div>
-            <div className="md:w-full">
-              <Stacked />
-            </div> */}
-          {/* <div className="mt-2"></div>
-            <div className="md:w-full">
-              <Chart
-                id="pie-chart"
-                data={ecomPieChartData}
-                legendVisiblity={false}
-              />
-            </div> */}
+            {/* <div className="mt-2"></div>
+        <div className="md:w-full">
+          <Chart
+            id="pie-chart"
+            data={ecomPieChartData}
+            legendVisiblity={false}
+          />
+        </div> */}
+          </div>
+          {/* <IonItem>
+      <IonButton
+        onClick={(e) => {
+          // regroupjour(produit, datedebut, datefin)
+          window.location.href = "/FinancesCompta"
+        }}
+      >
+        Rafraichir
+      </IonButton>
+    </IonItem> */}
         </div>
-        {/* <IonItem>
-          <IonButton
-            onClick={(e) => {
-              // regroupjour(produit, datedebut, datefin)
-              window.location.href = "/FinancesCompta"
-            }}
-          >
-            Rafraichir
-          </IonButton>
-        </IonItem> */}
-      </div>
-    </IonList>
+      </IonList>
+    </>
   );
+  // return choiceacces === "aucun" || choiceacces === "principal" ? (
+  //   <>
+  //     {" "}
+  //     <IonList>
+  //       <div className="">
+  //         <IonItem lines="none">
+  //           <IonLabel position="stacked">
+  //             <h2 className="labh">Date de début</h2>
+  //           </IonLabel>
+  //           <IonInput
+  //             color="success"
+  //             type="date"
+  //             value={datedebut}
+  //             onIonChange={(e) => {
+  //               setDatedebut(format(new Date(e.detail.value!), "yyyy-MM-dd"));
+  //               vtotalsold(e.detail.value, datefin);
+  //               vmontotalv(e.detail.value, datefin);
+  //               vbenef(e.detail.value, datefin);
+  //               vtotalapprov(e.detail.value, datefin);
+  //             }}
+  //           ></IonInput>
+  //         </IonItem>
+  //         <IonItem lines="none" className="ion-margin-top">
+  //           <IonLabel position="stacked">
+  //             <h2 className="labh">Date de fin</h2>
+  //           </IonLabel>
+  //           <IonInput
+  //             color="danger"
+  //             type="date"
+  //             value={datefin}
+  //             onIonChange={(e) => {
+  //               setDatefin(format(new Date(e.detail.value!), "yyyy-MM-dd"));
+  //               vtotalsold(datedebut, e.detail.value);
+  //               vmontotalv(datedebut, e.detail.value);
+  //               vbenef(datedebut, e.detail.value);
+  //               vtotalapprov(datedebut, e.detail.value);
+  //             }}
+  //           ></IonInput>
+  //         </IonItem>
+  //         <div className="grid1">
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">Total vendu :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{totalvendu}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">Bénéfices :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{benefice}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">Montant vendu :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{montotalvendu}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">total approvisionné :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{totalapprov}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+
+  //         </div>
+
+  //       </div>
+  //     </IonList>
+  //   </>
+  // ) : (
+  //   <>
+  //     {" "}
+  //     <IonList>
+  //       <div className="">
+  //         <IonItem lines="none">
+  //           <IonLabel position="stacked">
+  //             <h2 className="labh">Date de début</h2>
+  //           </IonLabel>
+  //           <IonInput
+  //             color="success"
+  //             type="date"
+  //             value={datedebut}
+  //             onIonChange={(e) => {
+  //               setDatedebut(format(new Date(e.detail.value!), "yyyy-MM-dd"));
+  //               vtotalsold(e.detail.value, datefin);
+  //               vmontotalv(e.detail.value, datefin);
+  //               vbenef(e.detail.value, datefin);
+  //               vtotalapprov(e.detail.value, datefin);
+  //             }}
+  //           ></IonInput>
+  //         </IonItem>
+  //         <IonItem lines="none" className="ion-margin-top">
+  //           <IonLabel position="stacked">
+  //             <h2 className="labh">Date de fin</h2>
+  //           </IonLabel>
+  //           <IonInput
+  //             color="danger"
+  //             type="date"
+  //             value={datefin}
+  //             onIonChange={(e) => {
+  //               setDatefin(format(new Date(e.detail.value!), "yyyy-MM-dd"));
+  //               vtotalsold(datedebut, e.detail.value);
+  //               vmontotalv(datedebut, e.detail.value);
+  //               vbenef(datedebut, e.detail.value);
+  //               vtotalapprov(datedebut, e.detail.value);
+  //             }}
+  //           ></IonInput>
+  //         </IonItem>
+
+  //         <div className="grid1">
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">Total vendu :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{totalvendu}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">Bénéfices :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{benefice}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">Montant vendu :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{montotalvendu}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+  //           <IonItem lines="none" className="ion-margin-top">
+  //             <IonLabel>
+  //               <h2 className="labh">total approvisionné :</h2>
+  //             </IonLabel>
+  //             <IonLabel>
+  //               <h2 className="labh">{totalapprov}</h2>
+  //             </IonLabel>
+  //           </IonItem>
+
+  //         </div>
+
+  //       </div>
+  //     </IonList>
+  //   </>
+  // );
 };

@@ -160,11 +160,11 @@ export const DroitAcces = () => {
     } else {
       if (pass_dacces.length > 3) {
         setprogress(true);
-        Axios.post("https://backend-shop.benindigital.com/updatepassacces", {
+        Axios.post("https://backendtrader.digitalfirst.space/updatepassacces", {
           idcompte: JSON.parse(localStorage.getItem("user") + "").userId,
           pass_acces: pass_dacces,
         }).then((ret) => {
-          Axios.post("https://backend-shop.benindigital.com/affichepassacess", {
+          Axios.post("https://backendtrader.digitalfirst.space/affichepassacess", {
             idcompte: JSON.parse(localStorage.getItem("user") + "").userId,
           }).then((ret) => {
             dispatch(setPassacces(ret.data));
@@ -292,7 +292,7 @@ export const DroitAcces = () => {
   const regg = (id_boutique, pass_entrer, store_name) => {
     if (pass_entrer === pass_acces[0].pass_acces ) {
       setprogress1(true);
-      Axios.post("https://backend-shop.benindigital.com/majaccesboutique", {
+      Axios.post("https://backendtrader.digitalfirst.space/majaccesboutique", {
         id_compte: JSON.parse(localStorage.getItem("user") + "").userId,
         id_boutique: id_boutique,
         store_name: store_name,
@@ -311,7 +311,7 @@ export const DroitAcces = () => {
       }).then((ret) => {
         console.log(ret.data);
         Axios.post(
-          "https://backend-shop.benindigital.com/afficheaccesparboutique",
+          "https://backendtrader.digitalfirst.space/afficheaccesparboutique",
           {
             id_compte: JSON.parse(localStorage.getItem("user") + "").userId,
           }

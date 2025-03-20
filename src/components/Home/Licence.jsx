@@ -14,8 +14,15 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Axios from "axios";
 import { setCredentials } from "../../Feature/auth/AuthSlice";
-import { IonContent, IonInput, IonLoading, IonTextarea, IonToast } from "@ionic/react";
-import { setdate, setHash_code } from "../../Feature/HashSlice";
+import {
+  IonContent,
+  IonInput,
+  IonLoading,
+  IonTextarea,
+  IonToast,
+} from "@ionic/react";
+import { setBadge, setBoutiquecompte, setdate, setHash_code } from "../../Feature/HashSlice";
+import { body } from "ionicons/icons";
 
 const License = () => {
   const [Hashval, setHashval] = useState("");
@@ -37,6 +44,15 @@ const License = () => {
   const [showToastto, setShowToastto] = useState(false);
   const [showToasttop, setShowToasttop] = useState(false);
   const [tEXT, setTExt] = useState("");
+  const [dateserveur, setdateserveur] = useState("");
+
+  const recup_date_server = () => {
+    Axios.get("https://backendtrader.digitalfirst.space/date_time").then(
+      (res) => {
+        setdateserveur(res.data[0].time_actu);
+      }
+    );
+  };
 
   const verifhash = () => {
     if (!Hashval) {
@@ -51,10 +67,12 @@ const License = () => {
     if (Hashval) {
       setShowLoading(true);
       var js = 0;
-      Axios.post("https://backend-shop.benindigital.com/onehash", {
-        id: userid.userId,
+      console.log(JSON.parse(String(localStorage.getItem("user"))).userId);
+      Axios.post("https://backendtrader.digitalfirst.space/onehash", {
+        id: JSON.parse(String(localStorage.getItem("user"))).userId,
       }).then((res) => {
         if (res.data.message === "boutique a hash") {
+          console.log(res.data.message);
           setShowToasttop(true);
           setTimeout(() => {
             setShowToasttop(false);
@@ -64,8 +82,36 @@ const License = () => {
             if (datahash[index].hash_code === Hashval) {
               console.log("hash trouver");
               console.log(dateActu);
-              console.log(userid.userId);
-              const y = new Date("2022-12-21");
+              console.log(
+                JSON.parse(String(localStorage.getItem("user"))).userId
+              );
+              const tempsEnMillisecondes = Date.parse(dateserveur);
+
+              // Créer un objet Date à partir des millisecondes
+              const dateActuelle = new Date(tempsEnMillisecondes);
+              // Ajouter le nombre de jours saisi par l'utilisateur
+              dateActuelle.setDate(
+                dateActuelle.getDate() +
+                parseInt(
+                  JSON.parse(
+                    String(localStorage.getItem("validity_paiement"))
+                  )
+                )
+              );
+              // Récupérer les composantes de la date
+              const annee = dateActuelle.getFullYear().toString();
+              // const annee = dateActuelle.getFullYear().toString().substring(2);
+              const mois = (dateActuelle.getMonth() + 1)
+                .toString()
+                .padStart(2, "0");
+              const jour = dateActuelle.getDate().toString().padStart(2, "0");
+              // Afficher la date dans x jours
+              console.log(
+                `Dans ${JSON.parse(
+                  String(localStorage.getItem("validity_paiement"))
+                )} jours, nous serons le ${annee}-${mois}-${jour}`
+              );
+              const y = new Date(`${annee}-${mois}-${jour}`);
               const x = new Date(dateActu);
               const date1utc = Date.UTC(
                 x.getFullYear(),
@@ -79,12 +125,15 @@ const License = () => {
               );
               const dayunit = 1000 * 60 * 60 * 24;
               const numberday = (date2utc - date1utc) / dayunit;
+              const date_end = `${annee}-${mois}-${jour}`;
               console.log(numberday);
-              Axios.post("https://backend-shop.benindigital.com/majhash", {
+              Axios.post("https://backendtrader.digitalfirst.space/majhash", {
                 id: datahash[index].id,
                 date_start: dateActu,
+                date_end: date_end,
                 status_hash: "ACTIF",
-                id_boutique: userid.userId,
+                id_boutique: JSON.parse(String(localStorage.getItem("user")))
+                  .userId,
                 validity: numberday,
                 // eslint-disable-next-line no-loop-func
               }).then((ret) => {
@@ -108,10 +157,25 @@ const License = () => {
                     setShowToastt(false);
                   }, [4000]);
                   setHashExist(true);
+                  Axios.post(
+                    "https://backendtrader.digitalfirst.space/afficheboutiqueparcompte",
+                    {
+                      idcompte: JSON.parse(localStorage.getItem("user") + "").userId,
+                    }
+                  ).then((ret) => {
+                    dispatch(setBoutiquecompte(ret.data));
+                    if (JSON.parse(localStorage.getItem("badge") + "")) {
+                      dispatch(setBadge(JSON.parse(localStorage.getItem("badge") + "")));
+                    } else {
+                      console.log(ret.data[0].id, "je viens de faire ceci");
+                      dispatch(setBadge(parseInt(ret.data[0].id)));
+                    }
+                  })
                   setTimeout(() => {
                     setHashExist(false);
                   }, [4000]);
                   setShowLoading(false);
+
                   setTimeout(() => {
                     window.location.href = "/home";
                   }, [2000]);
@@ -137,13 +201,33 @@ const License = () => {
               }, [2000]);
             }
           }, [1000]);
+          console.log(res.data.message);
         } else if (res.data.message === "aucun hash atribuer") {
+          console.log(res.data.message);
+
           for (let index = 0; index < datahash.length; index++) {
             if (datahash[index].hash_code === Hashval) {
               console.log("hash trouver");
               console.log(dateActu);
               console.log(userid.userId);
-              const y = new Date("2022-12-21");
+              const tempsEnMillisecondes = Date.parse(dateserveur);
+
+              // Créer un objet Date à partir des millisecondes
+              const dateActuelle = new Date(tempsEnMillisecondes);
+              // Ajouter le nombre de jours saisi par l'utilisateur
+              dateActuelle.setDate(dateActuelle.getDate() + parseInt(7));
+              // Récupérer les composantes de la date
+              const annee = dateActuelle.getFullYear().toString();
+              // const annee = dateActuelle.getFullYear().toString().substring(2);
+              const mois = (dateActuelle.getMonth() + 1)
+                .toString()
+                .padStart(2, "0");
+              const jour = dateActuelle.getDate().toString().padStart(2, "0");
+              // Afficher la date dans x jours
+              console.log(
+                `Dans ${7} jours, nous serons le ${annee}-${mois}-${jour}`
+              );
+              const y = new Date(`${annee}-${mois}-${jour}`);
               const x = new Date(dateActu);
               const date1utc = Date.UTC(
                 x.getFullYear(),
@@ -157,12 +241,15 @@ const License = () => {
               );
               const dayunit = 1000 * 60 * 60 * 24;
               const numberday = (date2utc - date1utc) / dayunit;
+              const date_end = `${annee}-${mois}-${jour}`;
               console.log(numberday);
-              Axios.post("https://backend-shop.benindigital.com/majhash", {
+              Axios.post("https://backendtrader.digitalfirst.space/majhash", {
                 id: datahash[index].id,
                 date_start: dateActu,
+                date_end: date_end,
                 status_hash: "ACTIF",
-                id_boutique: userid.userId,
+                id_boutique: JSON.parse(String(localStorage.getItem("user")))
+                  .userId,
                 validity: numberday,
                 // eslint-disable-next-line no-loop-func
               }).then((ret) => {
@@ -182,6 +269,20 @@ const License = () => {
                 } else if (ret.data === "success") {
                   js = 2;
                   setShowToastt(true);
+                  Axios.post(
+                    "https://backendtrader.digitalfirst.space/afficheboutiqueparcompte",
+                    {
+                      idcompte: JSON.parse(localStorage.getItem("user") + "").userId,
+                    }
+                  ).then((ret) => {
+                    dispatch(setBoutiquecompte(ret.data));
+                    if (JSON.parse(localStorage.getItem("badge") + "")) {
+                      dispatch(setBadge(JSON.parse(localStorage.getItem("badge") + "")));
+                    } else {
+                      console.log(ret.data[0].id, "je viens de faire ceci");
+                      dispatch(setBadge(parseInt(ret.data[0].id)));
+                    }
+                  })
                   setTimeout(() => {
                     setShowToastt(false);
                   }, [4000]);
@@ -232,19 +333,19 @@ const License = () => {
     return result;
   };
   const envoie_hash = () => {
-    Axios.post("https://backend-shop.benindigital.com/licence_hash", {
+    Axios.post("https://backendtrader.digitalfirst.space/licence_hash", {
       hash: makeid(150),
     }).then((ret) => {
       console.log(ret.data);
     });
   };
-  
+
   const update_hash = () => {
     verifhash();
   };
   const recupe_hash = () => {
     try {
-      fetch("https://backend-shop.benindigital.com/list_hash")
+      fetch("https://backendtrader.digitalfirst.space/list_hash")
         .then((res) => {
           const data = res.json();
           return data;
@@ -259,12 +360,12 @@ const License = () => {
           // setday1(dd.split("T")[0]);
           dispatch(setHash_code(data));
         });
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const actu_time = () => {
     try {
-      fetch("https://backend-shop.benindigital.com/date_time")
+      fetch("https://backendtrader.digitalfirst.space/date_time")
         .then((res) => {
           const data = res.json();
           return data;
@@ -273,12 +374,14 @@ const License = () => {
           console.log(data[0].time_actu.split("T")[0]);
           dispatch(setdate(data[0].time_actu.split("T")[0]));
         });
-    } catch (e) {}
+    } catch (e) { }
   };
   useEffect(() => {
     // window.setInterval(() => {
     recupe_hash();
     actu_time();
+    recup_date_server();
+
     // }, 2000);
   }, []);
   return (
@@ -311,18 +414,19 @@ const License = () => {
         duration={4000}
         position="top"
       />
-       <IonToast
+
+      <IonToast
         isOpen={showToasttop}
         onDidDismiss={() => setShowToasttop(false)}
-        message="Une boutique n'a droit qu'a un licence valide"
+        message="Une boutique n'a droit qu'a une licence valide"
         duration={4000}
         position="top"
       />
       <IonContent>
-      <div class="flex items-center min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
-        <div class="flex-1 h-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl dark:bg-gray-800">
-          <div class="flex flex-col overflow-y-auto md:flex-row">
-            {/* <div class="h-32 md:h-auto md:w-1/2">
+        <div class="flex items-center min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
+          <div class="flex-1 h-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl dark:bg-gray-800">
+            <div class="flex flex-col overflow-y-auto md:flex-row">
+              {/* <div class="h-32 md:h-auto md:w-1/2">
               <img
                 aria-hidden="true"
                 class="object-cover w-full h-full dark:hidden"
@@ -336,47 +440,58 @@ const License = () => {
                 alt="Office"
               />
             </div> */}
-            <div class="flex items-center justify-center p-6 sm:p-12 md:w-1/2">
-              <div class="w-full flex flex-col">
-                <div className="w-full items-center justify-center text-center">
-                  <h1 class="mb-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
-                    Configuration de la Licence
-                  </h1>
-                </div>
-
-                <label class=" text-sm">
-                  <IonTextarea
-                    className="w-full mt-1 h-30 text-sm border-2 border-color bg-white rounded-md p-2 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple form-input"
-                    placeholder="Veuillez entrez le code de votre licence reçus par mail"
-                    value={Hashval}
-                    onIonChange={(e) => setHashval(e.target.value)}
-                  />
-                </label>
-
-                {ifHash ? (
-                  <div className="empty_full">
-                    Veuillez entrer votre Licence
+              <div class="flex items-center justify-center p-6 sm:p-12 md:w-1/2">
+                <div class="w-full flex flex-col">
+                  <div className="w-full items-center justify-center text-center">
+                    <h1 class="mb-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
+                      Configuration de la Licence
+                    </h1>
                   </div>
-                ) : null}
 
-                {hashExist
-                  ? // <div className="empty_full">licence exist</div>
+                  <label class=" text-sm">
+                    <IonTextarea
+                      className="w-full mt-1 h-30 text-sm border-2 border-color bg-white rounded-md p-2 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple form-input"
+                      placeholder="Veuillez entrez le code de votre licence reçus par mail"
+                      value={Hashval}
+                      onIonChange={(e) => setHashval(e.target.value)}
+                    />
+                  </label>
+
+                  {ifHash ? (
+                    <div className="empty_full">
+                      Veuillez entrer votre Licence
+                    </div>
+                  ) : null}
+
+                  {hashExist
+                    ? // <div className="empty_full">licence exist</div>
                     null
-                  : hashExistt
-                  ? // <div className="empty_full">licence non exist</div>
-                    null
-                  : null}
+                    : hashExistt
+                      ? // <div className="empty_full">licence non exist</div>
+                      null
+                      : null}
 
-                <a
-                  class="block w-full no-underline px-4 py-2 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-deep_sky_blue border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
-                  onClick={verifhash}
-                >
-                  Valider
-                </a>
+                  <a
+                    class="block w-full no-underline px-4 py-2 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-deep_sky_blue border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+                    onClick={() => {
+                      verifhash();
+                      // console.log(dateserveur);
+                    }}
+                  >
+                    Valider
+                  </a>
 
-                <hr class="my-3" />
+                  <hr class="my-3" />
 
-                {/* <button class="flex items-center no-underline justify-center w-full px-4 py-2 text-sm font-medium leading-5 text-gray-700 transition-colors duration-150 border border-gray-300 rounded-lg dark:text-gray-400 active:bg-transparent hover:border-gray-500 focus:border-gray-500 active:text-gray-500 focus:outline-none focus:shadow-outline-gray">
+                  <p class="">
+                    <Link
+                      class="text-sm no-underline font-medium text-deep_sky_blue dark:text-deep_sky_blue hover:underline"
+                      to={"/pricing"}
+                    >
+                      Vous n'avez pas de licence ? Consulter nos prix.
+                    </Link>
+                  </p>
+                  {/* <button class="flex items-center no-underline justify-center w-full px-4 py-2 text-sm font-medium leading-5 text-gray-700 transition-colors duration-150 border border-gray-300 rounded-lg dark:text-gray-400 active:bg-transparent hover:border-gray-500 focus:border-gray-500 active:text-gray-500 focus:outline-none focus:shadow-outline-gray">
                   <FaInstagram className="text-icon-color text-xl" /> &nbsp;
                   &nbsp; Instagram
                 </button>
@@ -384,11 +499,11 @@ const License = () => {
                   <FaTwitter className="text-icon-color text-xl" /> &nbsp;
                   &nbsp; Twitter
                 </button> */}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
       </IonContent>
     </>
   );

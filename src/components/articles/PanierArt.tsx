@@ -46,7 +46,7 @@ const PanierArt: React.FC = () => {
 
 
     const getpan = () => {
-        fetch('https://backend-shop.benindigital.com/affichepanier').then((res) => {
+        fetch('https://backendtrader.digitalfirst.space/affichepanier').then((res) => {
             const data = res.json()
             return data
         }).then((data) => {
@@ -63,7 +63,7 @@ const PanierArt: React.FC = () => {
 
 
     const envoi = () => {
-        Axios.post('https://backend-shop.benindigital.com/ajoutcommande', {
+        Axios.post('https://backendtrader.digitalfirst.space/ajoutcommande', {
             totalquant: totalquant,
             totalprix: totalprix,
             invoice: invoice,
@@ -79,7 +79,7 @@ const PanierArt: React.FC = () => {
     const envoi1 = () => {
         panier.map ((val, key)=> {
 
-            Axios.post('https://backend-shop.benindigital.com/ajoutcomList', {
+            Axios.post('https://backendtrader.digitalfirst.space/ajoutcomList', {
                 totalquant: val.product_quantity,
                 totalprix: val.total_price,
                 nomProduit: val.product_name,
@@ -98,7 +98,7 @@ const PanierArt: React.FC = () => {
     }
 
     const suppr = () => {
-        fetch('https://backend-shop.benindigital.com/supprpan', {
+        fetch('https://backendtrader.digitalfirst.space/supprpan', {
             
         }).then((data) => {
             if (data ) {
